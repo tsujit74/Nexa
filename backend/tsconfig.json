@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",                   
+    "module": "CommonJS",                   
+    "moduleResolution": "Node",
+    "rootDir": "src",                       
+    "outDir": "dist",                      
+    "lib": ["ESNext"],
+    "types": ["node"],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,                     
+    "declaration": true,                   
+    "declarationMap": true,                 
+    "strict": true,                        
+    "skipLibCheck": true,                  
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*"],                  
+  "exclude": ["node_modules", "dist"]       
+}
