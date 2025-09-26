@@ -26,3 +26,4 @@ export const deletePost = async (id: string) => {
   return del<{ success: boolean }>(`/posts/${id}`);
 };
 
+
