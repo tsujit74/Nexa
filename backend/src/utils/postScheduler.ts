@@ -52,16 +52,16 @@ export const runSchedulerNow = async () => {
           }
         }
 
-        // // LinkedIn
-        // if (["linkedin", "all"].includes(post.platform)) {
-        //   if (user.socialAccounts.linkedin) {
-        //     try {
-        //       await postToLinkedIn(post, user.socialAccounts.linkedin);
-        //     } catch (err) {
-        //       console.error(`LinkedIn failed for ${post._id}:`, err);
-        //     }
-        //   }
-        // }
+        // LinkedIn
+        if (["linkedin", "all"].includes(post.platform)) {
+  if (user.socialAccounts.linkedin) {
+    try {
+      await postToLinkedIn(post, user.socialAccounts.linkedin.accessToken);
+    } catch (err) {
+      console.error(`LinkedIn failed for ${post._id}:`, err);
+    }
+  }
+}
 
         // Instagram
         // if (["instagram", "all"].includes(post.platform)) {

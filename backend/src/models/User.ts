@@ -15,7 +15,7 @@ export interface ILinkedinAccount {
 
 export interface IInstagramAccount {
   accessToken: string;
-  instagramBusinessId: string;
+  instagramBusinessId?: string;
 }
 
 export interface ISocialAccounts {
