@@ -18,11 +18,11 @@ export const startOAuth = async (req: AuthRequest, res: Response) => {
     return res.status(400).json({ message: "Unsupported platform" });
   }
 
-  try {
-    if (!req.user || !req.token) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+  if (!req.user || !req.token) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
 
+  try {
     if (platform === "twitter") {
       const client = new TwitterApi({
         appKey: process.env.TWITTER_API_KEY!,
@@ -30,8 +30,6 @@ export const startOAuth = async (req: AuthRequest, res: Response) => {
       });
 
       const callbackUrl = process.env.TWITTER_CALLBACK_URL!;
-      console.log("📡 Twitter Callback URL:", callbackUrl);
-
       const { url, oauth_token, oauth_token_secret } =
         await client.generateAuthLink(callbackUrl);
 
@@ -53,7 +51,7 @@ export const startOAuth = async (req: AuthRequest, res: Response) => {
         process.env.LINKEDIN_CLIENT_ID
       }&redirect_uri=${encodeURIComponent(
         callbackUrl
-      )}&scope=openid%20profile%20email%20w_member_social&state=${req.token}`;
+      )}&scope=openid%20profile%20email%20w_member_social&state=${state}`;
 
       return res.json({ url });
     }
@@ -78,27 +76,23 @@ export const startOAuth = async (req: AuthRequest, res: Response) => {
 export const handleOAuthCallback = async (req: Request, res: Response) => {
   const { platform } = req.params;
 
-  if (platform === "twitter") {
-    const { oauth_token, oauth_verifier } = req.query;
+  try {
+    if (platform === "twitter") {
+      const { oauth_token, oauth_verifier } = req.query;
+      if (!oauth_token || !oauth_verifier) {
+        return res
+          .status(400)
+          .json({ message: "Missing oauth_token or oauth_verifier" });
+      }
 
-    if (!oauth_token || !oauth_verifier) {
-      return res
-        .status(400)
-        .json({ message: "Missing oauth_token or oauth_verifier" });
-    }
-
-    try {
       const user = await User.findOne({
         "socialAccounts.twitterTemp.oauthToken": oauth_token,
       });
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
+      if (!user) return res.status(404).json({ message: "User not found" });
 
       const tempTokens = user.socialAccounts?.twitterTemp;
-      if (!tempTokens) {
+      if (!tempTokens)
         return res.status(400).json({ message: "Missing temp tokens" });
-      }
 
       const client = new TwitterApi({
         appKey: process.env.TWITTER_API_KEY!,
@@ -119,35 +113,24 @@ export const handleOAuthCallback = async (req: Request, res: Response) => {
       user.markModified("socialAccounts");
       await user.save();
 
-      console.log("✅ Twitter account linked successfully");
       return res.redirect(
         `${process.env.FRONTEND_URL}/dashboard?linked=twitter`
       );
-    } catch (error: any) {
-      return res.status(500).json({ message: "OAuth callback failed" });
-    }
-  }
-
-  if (platform === "linkedin") {
-    const { code, state } = req.query;
-
-    if (!code || !state) {
-      return res.status(400).json({ message: "Missing code or state" });
     }
 
-    try {
+    if (platform === "linkedin") {
+      const { code, state } = req.query;
+      if (!code || !state)
+        return res.status(400).json({ message: "Missing code or state" });
+
       const decoded = jwt.verify(
         state as string,
         process.env.JWT_SECRET!
       ) as TokenPayload;
-      console.log("🔑 Decoded LinkedIn state:", decoded);
-
       const user = await User.findById(decoded.userId);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
+      if (!user) return res.status(404).json({ message: "User not found" });
 
-      const resp = await axios.post(
+      const tokenResp = await axios.post(
         "https://www.linkedin.com/oauth/v2/accessToken",
         new URLSearchParams({
           grant_type: "authorization_code",
@@ -159,43 +142,47 @@ export const handleOAuthCallback = async (req: Request, res: Response) => {
         { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
       );
 
-      const { access_token } = resp.data;
+      const { access_token, id_token } = tokenResp.data;
+      if (!access_token || !id_token)
+        return res.status(500).json({ message: "Failed to obtain tokens" });
+
+      // Fetch Lite Profile
+      const profileResp = await axios.get(
+        "https://api.linkedin.com/v2/userinfo",
+        {
+          headers: { Authorization: `Bearer ${access_token}` },
+        }
+      );
+
+      const linkedInId = profileResp.data.sub;
+      if (!linkedInId)
+        return res
+          .status(500)
+          .json({ message: "Failed to fetch LinkedIn profile" });
 
       user.socialAccounts = {
         ...user.socialAccounts,
-        linkedin: { accessToken: access_token },
+        linkedin: { accessToken: access_token, linkedInId },
       };
       user.markModified("socialAccounts");
       await user.save();
 
-      console.log("✅ LinkedIn account linked successfully");
       return res.redirect(
         `${process.env.FRONTEND_URL}/dashboard?linked=linkedin`
       );
-    } catch (error: any) {
-      return res.status(500).json({ message: "OAuth callback failed" });
-    }
-  }
-
-  if (platform === "instagram") {
-    const { code, state } = req.query;
-    if (!code || !state) {
-      console.error("❌ Missing Instagram code or state");
-      return res.status(400).json({ message: "Missing code or state" });
     }
 
-    try {
+    if (platform === "instagram") {
+      const { code, state } = req.query;
+      if (!code || !state)
+        return res.status(400).json({ message: "Missing code or state" });
+
       const decoded = jwt.verify(
         state as string,
         process.env.JWT_SECRET!
       ) as TokenPayload;
-      console.log("🔑 Decoded Instagram state:", decoded);
-
       const user = await User.findById(decoded.userId);
-      if (!user) {
-        console.error("❌ Instagram user not found");
-        return res.status(404).json({ message: "User not found" });
-      }
+      if (!user) return res.status(404).json({ message: "User not found" });
 
       const resp = await axios.post(
         "https://api.instagram.com/oauth/access_token",
@@ -209,8 +196,11 @@ export const handleOAuthCallback = async (req: Request, res: Response) => {
         { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
       );
 
-      console.log("📡 Instagram access token response:", resp.data);
       const { access_token } = resp.data;
+      if (!access_token)
+        return res
+          .status(500)
+          .json({ message: "Failed to get Instagram token" });
 
       user.socialAccounts = {
         ...user.socialAccounts,
@@ -219,26 +209,18 @@ export const handleOAuthCallback = async (req: Request, res: Response) => {
       user.markModified("socialAccounts");
       await user.save();
 
-      console.log("✅ Instagram account linked successfully");
       return res.redirect(
         `${process.env.FRONTEND_URL}/dashboard?linked=instagram`
       );
-    } catch (error: any) {
-      console.error(
-        "❌ Instagram OAuth callback error:",
-        error.response?.data || error.message
-      );
-      return res.status(500).json({ message: "OAuth callback failed" });
     }
+  } catch (error: any) {
+    return res.status(500).json({ message: "OAuth callback failed" });
   }
 };
 
-// ------------------ GET LINKED ACCOUNTS ------------------
 export const getLinkedAccounts = async (req: AuthRequest, res: Response) => {
   try {
-    if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
     return res.json({ socialAccounts: req.user.socialAccounts || {} });
   } catch (error) {
     return res.status(500).json({ message: "Failed to fetch accounts" });
