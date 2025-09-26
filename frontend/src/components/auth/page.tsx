@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/context/AuthContext";
@@ -13,6 +12,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -23,12 +23,16 @@ export default function AuthPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
+
     try {
       if (isLogin) {
         await login(email, password);
       } else {
         await signup(name, email, password);
       }
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -38,7 +42,7 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded shadow w-full max-w-md">
+      <div className="bg-white p-8 shadow w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center">
           {isLogin ? "Login" : "Signup"}
         </h2>
@@ -50,7 +54,7 @@ export default function AuthPage() {
               placeholder="Name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="border p-2 rounded"
+              className="border p-2"
               required
             />
           )}
@@ -59,7 +63,7 @@ export default function AuthPage() {
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="border p-2 rounded"
+            className="border p-2"
             required
           />
           <input
@@ -67,13 +71,16 @@ export default function AuthPage() {
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="border p-2 rounded"
+            className="border p-2"
             required
           />
+
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+
           <button
             type="submit"
             disabled={loading}
-            className="bg-blue-500 text-white py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+            className="bg-blue-500 text-white py-2 hover:bg-blue-600 disabled:opacity-50"
           >
             {loading ? "Please wait..." : isLogin ? "Login" : "Signup"}
           </button>

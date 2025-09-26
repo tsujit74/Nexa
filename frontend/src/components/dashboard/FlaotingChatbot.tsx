@@ -56,7 +56,7 @@ export default function FloatingChatbot({ onGenerate }: FloatingChatbotProps) {
 
       {open && (
         <div
-          className="fixed w-80 h-96 bg-white border rounded-lg shadow-lg flex flex-col z-50 cursor-move"
+          className="fixed w-80 h-96 bg-white border  shadow-lg flex flex-col z-50 cursor-move"
           style={{ left: position.x, top: position.y }}
         >
           {/* Header */}

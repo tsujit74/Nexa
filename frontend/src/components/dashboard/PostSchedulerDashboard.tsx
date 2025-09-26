@@ -65,7 +65,7 @@ export default function PostSchedulerCalendar() {
   }, [filteredPosts]);
 
   return (
-    <div className="bg-white p-6 rounded shadow-lg mt-6">
+    <div className="bg-white p-6  mt-6">
       <h3 className="text-2xl font-semibold mb-4 text-gray-800">
         Post Scheduler
       </h3>
@@ -75,7 +75,7 @@ export default function PostSchedulerCalendar() {
           <button
             key={status}
             onClick={() => setSelectedStatus(status)}
-            className={`px-4 py-2 rounded font-semibold ${
+            className={`px-4 py-2  font-semibold ${
               selectedStatus === status
                 ? "bg-blue-600 text-white"
                 : "bg-gray-100 text-gray-800 hover:bg-gray-200"
@@ -120,7 +120,7 @@ export default function PostSchedulerCalendar() {
           role="dialog"
           aria-modal="true"
         >
-          <div className="bg-white rounded-lg shadow-lg w-96 p-6 relative">
+          <div className="bg-white  w-96 p-6 relative">
             <button
               className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
               onClick={() => setSelectedPost(null)}

@@ -31,7 +31,7 @@ export default function SocialAccounts() {
 
   if (fetching) {
     return (
-      <div className="flex justify-center items-center p-8 bg-white rounded-lg shadow-lg">
+      <div className="flex justify-center items-center p-8 bg-white  shadow-lg">
         <span className="text-gray-500 text-lg">Loading social accounts...</span>
       </div>
     );
@@ -47,7 +47,7 @@ export default function SocialAccounts() {
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg space-y-6">
+    <div className="bg-white p-6  space-y-6">
       <h3 className="text-2xl font-semibold text-gray-800 border-b pb-3">
         Linked Social Accounts
       </h3>
@@ -56,7 +56,7 @@ export default function SocialAccounts() {
         {platforms.map((platform) => (
           <div
             key={platform.name}
-            className="flex flex-col justify-between p-4 border rounded-lg hover:shadow-md transition duration-200"
+            className="flex flex-col justify-between p-4 border  hover:shadow-md transition duration-200"
           >
             <div className="flex items-center gap-3">
               {platform.icon}
@@ -71,7 +71,7 @@ export default function SocialAccounts() {
               <button
                 disabled={loading}
                 onClick={() => linkAccount(platform.name)}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg shadow-sm text-sm font-medium transition mt-4 disabled:opacity-50"
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2  shadow-sm text-sm font-medium transition mt-4 disabled:opacity-50"
               >
                 {loading ? "Linking..." : "Link Account"}
               </button>

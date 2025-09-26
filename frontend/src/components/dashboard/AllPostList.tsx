@@ -55,7 +55,7 @@ export default function AllPostsList() {
   const renderPostItem = (post: Post) => (
     <div
       key={post._id}
-      className="border p-3 rounded flex flex-col md:flex-row md:justify-between items-start md:items-center gap-2 hover:bg-gray-50 cursor-pointer transition"
+      className="border p-3  flex flex-col md:flex-row md:justify-between items-start md:items-center gap-2 hover:bg-gray-50 cursor-pointer transition"
       onClick={() => setSelectedPost(post)}
       aria-label={`Post on ${post.platform} scheduled for ${formatIST(post.scheduledDate)}`}
     >
@@ -65,7 +65,7 @@ export default function AllPostsList() {
         <p className="text-sm text-gray-500 capitalize">Platform: {post.platform || "N/A"}</p>
       </div>
       <span
-        className={`px-2 py-1 rounded font-semibold ${
+        className={`px-2 py-1  font-semibold ${
           post.status === "pending"
             ? "bg-yellow-200 text-yellow-800"
             : post.status === "posted"
@@ -80,7 +80,7 @@ export default function AllPostsList() {
 
   if (loading) {
     return (
-      <div className="bg-white p-6 rounded shadow text-gray-600 text-center">
+      <div className="bg-white p-6  shadow text-gray-600 text-center">
         Loading posts...
       </div>
     );
@@ -88,7 +88,7 @@ export default function AllPostsList() {
 
   if (error) {
     return (
-      <div className="bg-red-50 p-6 rounded shadow text-red-700 text-center">
+      <div className="bg-red-50 p-6  shadow text-red-700 text-center">
         {error}
       </div>
     );
@@ -96,7 +96,7 @@ export default function AllPostsList() {
 
   if (!posts.length) {
     return (
-      <div className="bg-white p-6 rounded shadow text-gray-600 text-center">
+      <div className="bg-white p-6  shadow text-gray-600 text-center">
         No posts available. Create a new post to get started.
       </div>
     );
@@ -115,7 +115,7 @@ export default function AllPostsList() {
       {/* Sections */}
       {filter === "pending" || filter === "all" ? (
         pendingPosts.length > 0 && (
-          <section id="pendingSection" className="bg-white p-4 rounded shadow">
+          <section id="pendingSection" className="bg-white p-4  shadow">
             <h3 className="text-lg font-semibold mb-3">Pending Posts</h3>
             <div className="space-y-3">{pendingPosts.map(renderPostItem)}</div>
           </section>
@@ -124,7 +124,7 @@ export default function AllPostsList() {
 
       {filter === "posted" || filter === "all" ? (
         postedPosts.length > 0 && (
-          <section id="postedSection" className="bg-white p-4 rounded shadow">
+          <section id="postedSection" className="bg-white p-4  shadow">
             <h3 className="text-lg font-semibold mb-3">Posted Posts</h3>
             <div className="space-y-3">{postedPosts.map(renderPostItem)}</div>
           </section>
@@ -133,7 +133,7 @@ export default function AllPostsList() {
 
       {filter === "failed" || filter === "all" ? (
         failedPosts.length > 0 && (
-          <section id="failedSection" className="bg-white p-4 rounded shadow">
+          <section id="failedSection" className="bg-white p-4  shadow">
             <h3 className="text-lg font-semibold mb-3">Failed Posts</h3>
             <div className="space-y-3">{failedPosts.map(renderPostItem)}</div>
           </section>
@@ -143,7 +143,7 @@ export default function AllPostsList() {
       {/* Modal */}
       {selectedPost && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-11/12 md:w-1/2 relative">
+          <div className="bg-white p-6  shadow-lg w-11/12 md:w-1/2 relative">
             <button
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
               onClick={() => setSelectedPost(null)}
@@ -157,7 +157,7 @@ export default function AllPostsList() {
             <p className="mb-2">
               <strong>Status:</strong>{" "}
               <span
-                className={`px-2 py-1 rounded font-semibold ${
+                className={`px-2 py-1  font-semibold ${
                   selectedPost.status === "pending"
                     ? "bg-yellow-200 text-yellow-800"
                     : selectedPost.status === "posted"

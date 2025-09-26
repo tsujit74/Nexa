@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePostsContext } from "@/context/PostContext";
 import { useToast } from "@/context/ToastContext";
+import { useSocialAccounts } from "@/hooks/useSocialAccount";
 
 interface CreatePostFormProps {
   initialContent?: string;
@@ -11,101 +12,159 @@ interface CreatePostFormProps {
 export default function CreatePostForm({ initialContent = "" }: CreatePostFormProps) {
   const { createPost } = usePostsContext();
   const { showToast } = useToast();
+  const { accounts } = useSocialAccounts();
 
   const [content, setContent] = useState(initialContent);
   const [scheduledDate, setScheduledDate] = useState("");
-  const [platform, setPlatform] = useState<"twitter" | "linkedin" | "instagram" | "all">("twitter");
+  const [selectedPlatforms, setSelectedPlatforms] = useState<("twitter" | "linkedin" | "instagram")[]>([]);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => setContent(initialContent), [initialContent]);
+  const allPlatforms: ("twitter" | "linkedin" | "instagram")[] = ["twitter", "linkedin", "instagram"];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!content.trim() || !scheduledDate) {
-      showToast({ message: "Please fill all fields", type: "error" });
+  // Reset content and selected platforms when initial content or accounts change
+  useEffect(() => {
+    setContent(initialContent);
+    setSelectedPlatforms([]);
+  }, [initialContent, accounts]);
+
+  const handlePlatformToggle = (platform: "twitter" | "linkedin" | "instagram") => {
+    if (!accounts?.[platform]) return; // cannot select unlinked
+    if (selectedPlatforms.includes(platform)) {
+      setSelectedPlatforms(selectedPlatforms.filter((p) => p !== platform));
+    } else {
+      setSelectedPlatforms([...selectedPlatforms, platform]);
+    }
+  };
+
+  const handleSubmit = async (instant = false) => {
+    if (!content.trim()) {
+      showToast({ message: "Post content cannot be empty", type: "error" });
       return;
     }
 
-    const selectedDate = new Date(scheduledDate);
-    if (selectedDate <= new Date()) {
-      showToast({ message: "Scheduled date must be in the future", type: "error" });
+    if (selectedPlatforms.length === 0) {
+      showToast({ message: "Please select at least one platform", type: "error" });
       return;
+    }
+
+    let scheduledDateISO: string | undefined;
+    if (!instant) {
+      if (!scheduledDate) {
+        showToast({ message: "Please select a schedule date & time", type: "error" });
+        return;
+      }
+
+      const selectedDateObj = new Date(scheduledDate);
+      if (selectedDateObj <= new Date()) {
+        showToast({ message: "Scheduled date must be in the future", type: "error" });
+        return;
+      }
+
+      scheduledDateISO = new Date(
+        selectedDateObj.getTime() - selectedDateObj.getTimezoneOffset() * 60000
+      ).toISOString();
+    } else {
+      scheduledDateISO = new Date().toISOString();
     }
 
     setLoading(true);
     try {
-      const utcDateISO = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString();
-
-      await createPost({
-        content,
-        scheduledDate: utcDateISO,
-        type: "static",
-        platform,
-      });
+      await Promise.all(
+        selectedPlatforms.map((platform) =>
+          createPost({
+            content,
+            scheduledDate: scheduledDateISO,
+            type: "static",
+            platform,
+          })
+        )
+      );
 
       setContent("");
       setScheduledDate("");
-      setPlatform("twitter");
+      setSelectedPlatforms([]);
 
-      showToast({ message: "Post scheduled successfully!", type: "success" });
+      showToast({
+        message: instant ? "Posted successfully!" : "Post scheduled successfully!",
+        type: "success",
+      });
     } catch (err) {
       console.error(err);
-      showToast({ message: "Failed to schedule post. Please try again.", type: "error" });
+      showToast({ message: "Failed to create post. Please try again.", type: "error" });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-lg w-full">
+    <div className="bg-white p-6 w-full">
       <h3 className="text-2xl font-semibold mb-4 text-gray-800">Create New Post</h3>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         <textarea
-          placeholder="Write your post..."
-          className="border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+          placeholder="Write your post or edit chatbot content..."
+          className="border  p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={4}
-          required
         />
+
+        <div className="flex flex-col gap-1">
+          <span className="text-gray-700 font-medium">Select Platform(s)</span>
+          <div className="flex gap-2 flex-wrap">
+            {allPlatforms.map((platform) => {
+              const isLinked = !!accounts?.[platform];
+              const isSelected = selectedPlatforms.includes(platform);
+              return (
+                <button
+                  key={platform}
+                  type="button"
+                  disabled={!isLinked}
+                  onClick={() => handlePlatformToggle(platform)}
+                  className={`px-3 py-1 font-medium border transition relative ${
+                    isLinked
+                      ? isSelected
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
+                      : "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                  }`}
+                  title={!isLinked ? `Please link your ${platform} account first` : ""}
+                >
+                  {platform.charAt(0).toUpperCase() + platform.slice(1)}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         <label className="flex flex-col gap-1">
           <span className="text-gray-700 font-medium">Schedule Date & Time</span>
           <input
             type="datetime-local"
-            className="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="border  p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             value={scheduledDate}
             min={new Date().toISOString().slice(0, 16)}
             onChange={(e) => setScheduledDate(e.target.value)}
-            required
           />
         </label>
 
-        <label className="flex flex-col gap-1">
-          <span className="text-gray-700 font-medium">Select Platform</span>
-          <select
-            className="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
-            value={platform}
-            onChange={(e) =>
-              setPlatform(e.target.value as "twitter" | "linkedin" | "instagram" | "all")
-            }
+        <div className="flex gap-2">
+          <button
+            onClick={() => handleSubmit(false)}
+            disabled={loading}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2  flex-1 disabled:opacity-50 transition"
           >
-            <option value="twitter">Twitter</option>
-            <option value="linkedin">LinkedIn</option>
-            <option value="instagram">Instagram</option>
-            <option value="all">All Platforms</option>
-          </select>
-        </label>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg disabled:opacity-50 transition"
-        >
-          {loading ? "Scheduling..." : "Schedule Post"}
-        </button>
-      </form>
+            {loading ? "Scheduling..." : "Schedule Post"}
+          </button>
+          <button
+            onClick={() => handleSubmit(true)}
+            disabled={loading}
+            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2  flex-1 disabled:opacity-50 transition"
+          >
+            {loading ? "Posting..." : "Post Now"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

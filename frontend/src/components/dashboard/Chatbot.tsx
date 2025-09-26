@@ -30,7 +30,7 @@ export default function Chatbot({ onGenerate }: ChatbotProps) {
         {messages.map((msg, idx) => (
           <div
             key={idx}
-            className={`p-2 rounded-lg max-w-[80%] ${
+            className={`p-2 max-w-[80%] ${
               msg.role === "user" ? "ml-auto bg-blue-500 text-white" : "mr-auto bg-gray-200 text-black"
             }`}
           >
@@ -46,13 +46,13 @@ export default function Chatbot({ onGenerate }: ChatbotProps) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          className="flex-1 border rounded-lg p-2"
+          className="flex-1 border  p-2"
           placeholder="Type your message..."
         />
         <button
           onClick={handleSend}
           disabled={loading}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg disabled:opacity-50"
+          className="bg-blue-600 text-white px-4 py-2 disabled:opacity-50"
         >
           Send
         </button>

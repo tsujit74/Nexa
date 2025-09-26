@@ -34,7 +34,7 @@ export default function PostStatusNav({
   };
 
   const getButtonClasses = (status: PostFilterStatus) =>
-    `px-4 py-2 rounded font-semibold transition ${
+    `px-4 py-2 font-semibold transition ${
       activeFilter === status
         ? "bg-blue-500 text-white"
         : status === "pending"
