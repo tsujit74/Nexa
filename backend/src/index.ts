@@ -7,57 +7,48 @@ import { connectDB } from "./config/db";
 import "./utils/postScheduler";
 import { runSchedulerNow } from "./utils/postScheduler";
 
-// Import routes
+// Routes
 import authRoutes from "./routes/authRoutes";
 import socialRoutes from "./routes/socialRoutes";
 import chatbotRoutes from "./routes/chatbotRoutes";
 import postRoutes from "./routes/postRoutes";
 import dashboardRoutes from "./routes/dashboardRoutes";
-
 import testGeminiRouter from "./routes/testGemini";
-
-
-
-// Import cron jobs
-import "./cron/postScheduler";
-
 
 const app = express();
 
+import "./cron/postScheduler";
+
 // Middleware
-app.use(cors());
-app.use(express.json());
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    credentials: true,
+  })
+);
+
+app.use(express.json()); // Parse JSON bodies
 
 
-app.use("/api", testGeminiRouter);
 
 // Routes
+app.use("/api", testGeminiRouter);
 app.use("/api/auth", authRoutes);
 app.use("/api/social", socialRoutes);
 app.use("/api/chatbot", chatbotRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
-
-
-
-
-
-
-
-
+// Manual scheduler trigger
 app.get("/run-scheduler", async (_req, res) => {
-  await runSchedulerNow();
-  res.send("Scheduler triggered manually!");
+  try {
+    await runSchedulerNow();
+    res.send("Scheduler triggered manually!");
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Failed to run scheduler.");
+  }
 });
-
-
-
-
-
-
-
-
 
 // Health Check
 app.get("/", (_req: Request, res: Response) => {
@@ -83,10 +74,10 @@ const PORT = process.env.PORT || 4000;
 
 connectDB()
   .then(() => {
-    console.log("Connected to MongoDB");
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    console.log("✅ Connected to MongoDB");
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   })
   .catch((err) => {
-    console.error("Failed to connect to DB:", err);
+    console.error("❌ Failed to connect to DB:", err);
     process.exit(1);
   });

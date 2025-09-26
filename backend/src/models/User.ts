@@ -1,29 +1,36 @@
-// src/models/User.ts
+// models/User.ts
 import { Schema, model, Document } from "mongoose";
+import bcrypt from "bcrypt";
 
-// Define allowed social platforms
 export type Platform = "twitter" | "linkedin" | "instagram";
 
-// Twitter account type for OAuth 1.0a
 export interface ITwitterAccount {
   accessToken: string;
   accessSecret: string;
 }
 
-// Define SocialAccounts type
-export interface ISocialAccounts {
-  twitter?: ITwitterAccount;
-  linkedin?: string;
-  instagram?: string;      
-  instagramId?: string;
+export interface ILinkedinAccount {
+  accessToken: string;
 }
 
-// User interface
+export interface IInstagramAccount {
+  accessToken: string;
+  instagramBusinessId: string;
+}
+
+export interface ISocialAccounts {
+  twitterTemp: any;
+  twitter?: ITwitterAccount;
+  linkedin?: ILinkedinAccount;
+  instagram?: IInstagramAccount;
+}
+
 export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
   socialAccounts: ISocialAccounts;
+  comparePassword(candidatePassword: string): Promise<boolean>;
 }
 
 const UserSchema = new Schema<IUser>(
@@ -40,5 +47,20 @@ const UserSchema = new Schema<IUser>(
     timestamps: true,
   }
 );
+
+// Pre-save hook to hash password
+UserSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
+
+// Method to compare passwords
+UserSchema.methods.comparePassword = async function (
+  candidatePassword: string
+) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
 
 export default model<IUser>("User", UserSchema);
