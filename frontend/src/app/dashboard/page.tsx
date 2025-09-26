@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import SocialAccounts from "@/components/dashboard/SocialAccount";
 import CreatePostForm from "@/components/dashboard/CreatePostForm";
 import AllPostsList from "@/components/dashboard/AllPostList";
@@ -8,8 +8,11 @@ import PostSchedulerCalendar from "@/components/dashboard/PostSchedulerDashboard
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { PostsProvider } from "@/context/PostContext";
 import Chatbot from "@/components/dashboard/Chatbot";
+import FloatingChatbot from "@/components/dashboard/FlaotingChatbot";
 
 export default function DashboardPage() {
+  const [generatedContent, setGeneratedContent] = useState("");
+
   return (
     <PostsProvider>
       <div className="min-h-screen flex bg-gray-100">
@@ -42,16 +45,13 @@ export default function DashboardPage() {
               </div>
 
               <div className="w-full md:w-1/3 bg-white p-6 rounded-lg shadow-lg">
-                <CreatePostForm />
+                <CreatePostForm initialContent={generatedContent} />
               </div>
             </div>
           </section>
-          <section id="allPosts">
-            <h2 className="text-3xl font-bold mb-4 text-gray-800 border-b pb-2">
-              Chatbot
-            </h2>
-            <Chatbot />
-          </section>
+          
+        <FloatingChatbot onGenerate={(text) => setGeneratedContent(text)} />
+          
         </main>
       </div>
     </PostsProvider>

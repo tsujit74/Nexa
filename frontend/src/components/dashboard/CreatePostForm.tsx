@@ -1,44 +1,40 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePostsContext } from "@/context/PostContext";
 import { useToast } from "@/context/ToastContext";
 
-export default function CreatePostForm() {
+interface CreatePostFormProps {
+  initialContent?: string;
+}
+
+export default function CreatePostForm({ initialContent = "" }: CreatePostFormProps) {
   const { createPost } = usePostsContext();
   const { showToast } = useToast();
 
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState(initialContent);
   const [scheduledDate, setScheduledDate] = useState("");
   const [platform, setPlatform] = useState<"twitter" | "linkedin" | "instagram" | "all">("twitter");
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => setContent(initialContent), [initialContent]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Validate inputs
     if (!content.trim() || !scheduledDate) {
       showToast({ message: "Please fill all fields", type: "error" });
       return;
     }
 
     const selectedDate = new Date(scheduledDate);
-    if (isNaN(selectedDate.getTime())) {
-      showToast({ message: "Invalid date format", type: "error" });
-      return;
-    }
-
     if (selectedDate <= new Date()) {
       showToast({ message: "Scheduled date must be in the future", type: "error" });
       return;
     }
 
     setLoading(true);
-
     try {
-      const utcDateISO = new Date(
-        selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000
-      ).toISOString();
+      const utcDateISO = new Date(selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000).toISOString();
 
       await createPost({
         content,
@@ -65,7 +61,6 @@ export default function CreatePostForm() {
       <h3 className="text-2xl font-semibold mb-4 text-gray-800">Create New Post</h3>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        {/* Content */}
         <textarea
           placeholder="Write your post..."
           className="border rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
@@ -75,7 +70,6 @@ export default function CreatePostForm() {
           required
         />
 
-        {/* Schedule Date */}
         <label className="flex flex-col gap-1">
           <span className="text-gray-700 font-medium">Schedule Date & Time</span>
           <input
@@ -88,7 +82,6 @@ export default function CreatePostForm() {
           />
         </label>
 
-        {/* Platform */}
         <label className="flex flex-col gap-1">
           <span className="text-gray-700 font-medium">Select Platform</span>
           <select
@@ -105,7 +98,6 @@ export default function CreatePostForm() {
           </select>
         </label>
 
-        {/* Submit Button */}
         <button
           type="submit"
           disabled={loading}

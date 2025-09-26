@@ -1,4 +1,3 @@
-// src/hooks/useChat.ts
 "use client";
 
 import { useState } from "react";
@@ -19,12 +18,14 @@ export const useChat = () => {
       const aiText = await sendChatMessage(text);
       const aiMsg: ChatMessage = { role: "ai", text: aiText };
       setMessages((prev) => [...prev, aiMsg]);
+      return aiText; // return for onGenerate
     } catch (err) {
       console.error("Chat error:", err);
       setMessages((prev) => [
         ...prev,
         { role: "ai", text: "⚠️ Error getting response." },
       ]);
+      return "⚠️ Error getting response.";
     } finally {
       setLoading(false);
     }
