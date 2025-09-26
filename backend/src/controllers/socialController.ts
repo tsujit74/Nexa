@@ -11,7 +11,6 @@ interface TokenPayload {
   userId: string;
 }
 
-// ------------------ START OAUTH ------------------
 export const startOAuth = async (req: AuthRequest, res: Response) => {
   console.log("🚀 startOAuth called for platform:", req.params.platform);
 
@@ -30,16 +29,13 @@ export const startOAuth = async (req: AuthRequest, res: Response) => {
       appSecret: process.env.TWITTER_API_SECRET!,
     });
 
-    // Callback must include our JWT so we know the user later
     const callbackUrl = `${process.env.TWITTER_CALLBACK_URL}?token=${req.token}`;
     console.log("📡 Callback URL:", callbackUrl);
 
     const { url, oauth_token, oauth_token_secret } =
       await client.generateAuthLink(callbackUrl);
 
-    console.log("✅ Twitter auth URL generated:", url);
 
-    // Store temp tokens in DB under twitterTemp
     await User.findByIdAndUpdate(req.user._id, {
       "socialAccounts.twitterTemp": {
         oauthToken: oauth_token,
@@ -49,26 +45,23 @@ export const startOAuth = async (req: AuthRequest, res: Response) => {
 
     return res.json({ url });
   } catch (error) {
-    console.error("🔥 startOAuth error:", error);
     return res.status(500).json({ message: "Failed to start OAuth" });
   }
 };
 
-// ------------------ HANDLE CALLBACK ------------------
+
 export const handleOAuthCallback = async (req: Request, res: Response) => {
   console.log("🔔 OAuth callback called for Twitter");
 
   const { oauth_token, oauth_verifier, token } = req.query;
 
   if (!oauth_token || !oauth_verifier || !token) {
-    console.log("❌ Missing parameters:", req.query);
     return res.status(400).json({
       message: "Missing oauth_token, oauth_verifier, or token",
     });
   }
 
   try {
-    // Verify JWT (to identify user)
     const decoded = jwt.verify(
       token as string,
       process.env.JWT_SECRET!
@@ -79,11 +72,10 @@ export const handleOAuthCallback = async (req: Request, res: Response) => {
 
     const tempTokens = user.socialAccounts?.twitterTemp;
     if (!tempTokens || tempTokens.oauthToken !== oauth_token) {
-      console.log("❌ OAuth token mismatch");
       return res.status(400).json({ message: "OAuth token mismatch" });
     }
 
-    // Exchange tokens
+
     const client = new TwitterApi({
       appKey: process.env.TWITTER_API_KEY!,
       appSecret: process.env.TWITTER_API_SECRET!,
@@ -96,7 +88,6 @@ export const handleOAuthCallback = async (req: Request, res: Response) => {
       oauth_verifier as string
     );
 
-    // ✅ Save permanent tokens using Mongoose-friendly update
     user.socialAccounts = {
       ...user.socialAccounts,
       twitter: { accessToken, accessSecret },
@@ -104,18 +95,13 @@ export const handleOAuthCallback = async (req: Request, res: Response) => {
     if (user.socialAccounts.twitterTemp) {
       delete user.socialAccounts.twitterTemp;
     }
-
-    // Force mark as modified
     user.markModified("socialAccounts");
 
     await user.save();
 
     console.log("✅ Twitter account linked successfully");
-
-    // Redirect to frontend
     return res.redirect(`${process.env.FRONTEND_URL}/dashboard?linked=twitter`);
   } catch (error) {
-    console.error("🔥 handleOAuthCallback error:", error);
     return res.status(500).json({ message: "OAuth callback failed" });
   }
 };

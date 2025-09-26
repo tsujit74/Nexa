@@ -31,16 +31,19 @@ export const getPosts = async (req: Request, res: Response) => {
 
 export const editPost = async (req: Request, res: Response) => {
   const userId = (req as any).user;
-  const { postId, content, type, scheduledDate, platform } = req.body;
+  const { id } = req.params; 
+  const { content, type, scheduledDate, platform } = req.body;
 
   try {
     const post = await Post.findOneAndUpdate(
-      { _id: postId, userId },
+      { _id: id, userId },
       { content, type, scheduledDate, platform },
       { new: true }
     );
+    if (!post) return res.status(404).json({ message: "Post not found" });
     res.json(post);
   } catch (err) {
     res.status(500).json({ message: "Error updating post" });
   }
 };
+
