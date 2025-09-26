@@ -1,21 +1,27 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useSocialAccounts } from "@/hooks/useSocialAccount";
 import { useSearchParams, useRouter } from "next/navigation";
 import { FaTwitter, FaLinkedin, FaInstagram } from "react-icons/fa";
 
 export default function SocialAccounts() {
-  const { accounts, fetching, loading, linkAccount, fetchAccounts, error } = useSocialAccounts();
+  const { accounts, fetching, loading, linkAccount, fetchAccounts, error } =
+    useSocialAccounts();
   const params = useSearchParams();
   const router = useRouter();
 
-  useEffect(() => {
+  // Safe useEffect with all dependencies
+  const handleLinked = useCallback(() => {
     if (params.get("linked") === "true") {
       fetchAccounts();
       router.replace("/dashboard");
     }
-  }, [params]);
+  }, [params, fetchAccounts, router]);
+
+  useEffect(() => {
+    handleLinked();
+  }, [handleLinked]);
 
   const platforms = [
     { name: "twitter", icon: <FaTwitter className="text-blue-400" size={20} /> },
@@ -42,7 +48,9 @@ export default function SocialAccounts() {
 
   return (
     <div className="bg-white p-6 rounded-lg space-y-6">
-      <h3 className="text-2xl font-semibold text-gray-800 border-b pb-3">Linked Social Accounts</h3>
+      <h3 className="text-2xl font-semibold text-gray-800 border-b pb-3">
+        Linked Social Accounts
+      </h3>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {platforms.map((platform) => (
@@ -74,7 +82,7 @@ export default function SocialAccounts() {
 
       {!accounts || Object.keys(accounts).length === 0 ? (
         <p className="text-gray-500 text-sm mt-4">
-          You have not linked any accounts yet. Click "Link Account" to start posting.
+          You have not linked any accounts yet. Click &quot;Link Account&quot; to start posting.
         </p>
       ) : null}
     </div>

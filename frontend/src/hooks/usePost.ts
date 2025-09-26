@@ -1,6 +1,4 @@
-"use client";
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/context/ToastContext";
 import * as postsApi from "@/lib/posts";
 import { PostType } from "@/lib/posts";
@@ -10,7 +8,7 @@ export function usePosts() {
   const [posts, setPosts] = useState<PostType[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     setLoading(true);
     try {
       const res = await postsApi.getPosts();
@@ -21,7 +19,7 @@ export function usePosts() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]); 
 
   const createPost = async (data: Omit<PostType, "_id" | "status">) => {
     const tempPost: PostType = {
@@ -68,9 +66,10 @@ export function usePosts() {
     }
   };
 
+ 
   useEffect(() => {
     fetchPosts();
-  }, []);
+  }, [fetchPosts]);
 
   return { posts, setPosts, fetchPosts, createPost, updatePost, deletePost, loading };
 }

@@ -1,18 +1,30 @@
 "use client";
 
-import FullCalendar, { EventInput } from "@fullcalendar/react";
+import FullCalendar from "@fullcalendar/react";
+import { EventInput } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { format } from "date-fns";
 import { usePostsContext } from "@/context/PostContext";
+
+interface Post {
+  _id: string;
+  content: string;
+  status: "pending" | "posted" | "failed";
+  platform: string;
+  scheduledDate: string;
+}
 
 export default function PostSchedulerCalendar() {
   const { posts } = usePostsContext();
   const [events, setEvents] = useState<EventInput[]>([]);
-  const [selectedStatus, setSelectedStatus] = useState<"pending" | "posted" | "failed" | "all">("all");
+  const [selectedStatus, setSelectedStatus] = useState<
+    "pending" | "posted" | "failed" | "all"
+  >("all");
+
   const [selectedPost, setSelectedPost] = useState<{
     content: string;
     status: string;
@@ -20,14 +32,20 @@ export default function PostSchedulerCalendar() {
     time: string;
   } | null>(null);
 
-  useEffect(() => {
-    const filteredPosts = selectedStatus === "all"
-      ? posts
-      : posts.filter(post => post.status === selectedStatus);
+  const filteredPosts = useMemo(
+    () =>
+      selectedStatus === "all"
+        ? posts
+        : posts.filter((post) => post.status === selectedStatus),
+    [posts, selectedStatus]
+  );
 
-    const mapped = filteredPosts.map(post => ({
+  useEffect(() => {
+    const mapped = filteredPosts.map((post: Post) => ({
       id: post._id,
-      title: `${post.platform.toUpperCase()} - ${post.content.slice(0, 30)}${post.content.length > 30 ? "..." : ""}`,
+      title: `${post.platform.toUpperCase()} - ${
+        post.content.slice(0, 30) + (post.content.length > 30 ? "..." : "")
+      }`,
       start: post.scheduledDate,
       color:
         post.status === "posted"
@@ -44,19 +62,19 @@ export default function PostSchedulerCalendar() {
     }));
 
     setEvents(mapped);
-  }, [posts, selectedStatus]);
+  }, [filteredPosts]);
 
   return (
     <div className="bg-white p-6 rounded shadow-lg mt-6">
-      {/* Title */}
-      <h3 className="text-2xl font-semibold mb-4 text-gray-800">Post Scheduler</h3>
+      <h3 className="text-2xl font-semibold mb-4 text-gray-800">
+        Post Scheduler
+      </h3>
 
-      {/* Filters Row */}
       <div className="flex gap-4 mb-6 flex-wrap">
-        {["all", "pending", "posted", "failed"].map(status => (
+        {(["all", "pending", "posted", "failed"] as const).map((status) => (
           <button
             key={status}
-            onClick={() => setSelectedStatus(status as any)}
+            onClick={() => setSelectedStatus(status)}
             className={`px-4 py-2 rounded font-semibold ${
               selectedStatus === status
                 ? "bg-blue-600 text-white"
@@ -64,12 +82,12 @@ export default function PostSchedulerCalendar() {
             }`}
           >
             {status.charAt(0).toUpperCase() + status.slice(1)}{" "}
-            {status !== "all" && `(${posts.filter(p => p.status === status).length})`}
+            {status !== "all" &&
+              `(${posts.filter((p) => p.status === status).length})`}
           </button>
         ))}
       </div>
 
-      {/* Calendar */}
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
         initialView="dayGridMonth"
@@ -80,8 +98,13 @@ export default function PostSchedulerCalendar() {
         }}
         events={events}
         height={650}
-        eventClick={info => {
-          const p = info.event.extendedProps as any;
+        eventClick={(info) => {
+          const p = info.event.extendedProps as {
+            content: string;
+            status: string;
+            platform: string;
+            time: string;
+          };
           setSelectedPost({
             content: p.content,
             status: p.status,
@@ -91,7 +114,6 @@ export default function PostSchedulerCalendar() {
         }}
       />
 
-      {/* Modal */}
       {selectedPost && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"

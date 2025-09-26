@@ -1,44 +1,58 @@
 "use client";
 
 import { usePostsContext } from "@/context/PostContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import PostStatusNav from "../PostStatusNav";
+
+interface Post {
+  _id: string;
+  content?: string;
+  scheduledDate?: string;
+  platform?: string;
+  status?: "pending" | "posted" | "failed";
+}
 
 export default function AllPostsList() {
   const { posts, fetchPosts } = usePostsContext();
-  const [selectedPost, setSelectedPost] = useState<any>(null);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"pending" | "posted" | "failed" | "all">("all");
 
+  const loadPosts = useCallback(async () => {
+    try {
+      setLoading(true);
+      await fetchPosts();
+    } catch (err) {
+      console.error(err);
+      setError("Failed to fetch posts.");
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchPosts]);
+
   useEffect(() => {
-    const loadPosts = async () => {
-      try {
-        setLoading(true);
-        await fetchPosts();
-      } catch (err) {
-        console.error(err);
-        setError("Failed to fetch posts.");
-      } finally {
-        setLoading(false);
-      }
-    };
     loadPosts();
-  }, []);
+  }, [loadPosts]);
 
-  const pendingPosts = posts.filter(p => p.status === "pending");
-  const postedPosts = posts.filter(p => p.status === "posted");
-  const failedPosts = posts.filter(p => p.status === "failed");
+  const pendingPosts = useMemo(() => posts.filter(p => p.status === "pending"), [posts]);
+  const postedPosts = useMemo(() => posts.filter(p => p.status === "posted"), [posts]);
+  const failedPosts = useMemo(() => posts.filter(p => p.status === "failed"), [posts]);
 
-  const formatIST = (dateStr: string) => {
+  const formatIST = (dateStr?: string) => {
     if (!dateStr) return "N/A";
     const date = new Date(dateStr);
     return new Date(date.getTime() + 5.5 * 60 * 60000).toLocaleString("en-IN", {
-      year: "numeric", month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", hour12: true
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
     });
   };
 
-  const renderPostItem = (post: any) => (
+  const renderPostItem = (post: Post) => (
     <div
       key={post._id}
       className="border p-3 rounded flex flex-col md:flex-row md:justify-between items-start md:items-center gap-2 hover:bg-gray-50 cursor-pointer transition"
@@ -55,8 +69,8 @@ export default function AllPostsList() {
           post.status === "pending"
             ? "bg-yellow-200 text-yellow-800"
             : post.status === "posted"
-              ? "bg-green-200 text-green-800"
-              : "bg-red-200 text-red-800"
+            ? "bg-green-200 text-green-800"
+            : "bg-red-200 text-red-800"
         }`}
       >
         {post.status || "unknown"}
@@ -91,31 +105,40 @@ export default function AllPostsList() {
   return (
     <div className="mt-6 space-y-6">
       {/* Navigation */}
-     
-        <PostStatusNav pendingCount={pendingPosts.length} postedCount={postedPosts.length} failedCount={failedPosts.length} onFilterChange={(status) => setFilter(status)}/>
-    
+      <PostStatusNav
+        pendingCount={pendingPosts.length}
+        postedCount={postedPosts.length}
+        failedCount={failedPosts.length}
+        onFilterChange={(status) => setFilter(status)}
+      />
 
       {/* Sections */}
-      {pendingPosts.length > 0 && (
-        <section id="pendingSection" className="bg-white p-4 rounded shadow">
-          <h3 className="text-lg font-semibold mb-3">Pending Posts</h3>
-          <div className="space-y-3">{pendingPosts.map(renderPostItem)}</div>
-        </section>
-      )}
+      {filter === "pending" || filter === "all" ? (
+        pendingPosts.length > 0 && (
+          <section id="pendingSection" className="bg-white p-4 rounded shadow">
+            <h3 className="text-lg font-semibold mb-3">Pending Posts</h3>
+            <div className="space-y-3">{pendingPosts.map(renderPostItem)}</div>
+          </section>
+        )
+      ) : null}
 
-      {postedPosts.length > 0 && (
-        <section id="postedSection" className="bg-white p-4 rounded shadow">
-          <h3 className="text-lg font-semibold mb-3">Posted Posts</h3>
-          <div className="space-y-3">{postedPosts.map(renderPostItem)}</div>
-        </section>
-      )}
+      {filter === "posted" || filter === "all" ? (
+        postedPosts.length > 0 && (
+          <section id="postedSection" className="bg-white p-4 rounded shadow">
+            <h3 className="text-lg font-semibold mb-3">Posted Posts</h3>
+            <div className="space-y-3">{postedPosts.map(renderPostItem)}</div>
+          </section>
+        )
+      ) : null}
 
-      {failedPosts.length > 0 && (
-        <section id="failedSection" className="bg-white p-4 rounded shadow">
-          <h3 className="text-lg font-semibold mb-3">Failed Posts</h3>
-          <div className="space-y-3">{failedPosts.map(renderPostItem)}</div>
-        </section>
-      )}
+      {filter === "failed" || filter === "all" ? (
+        failedPosts.length > 0 && (
+          <section id="failedSection" className="bg-white p-4 rounded shadow">
+            <h3 className="text-lg font-semibold mb-3">Failed Posts</h3>
+            <div className="space-y-3">{failedPosts.map(renderPostItem)}</div>
+          </section>
+        )
+      ) : null}
 
       {/* Modal */}
       {selectedPost && (
@@ -138,8 +161,8 @@ export default function AllPostsList() {
                   selectedPost.status === "pending"
                     ? "bg-yellow-200 text-yellow-800"
                     : selectedPost.status === "posted"
-                      ? "bg-green-200 text-green-800"
-                      : "bg-red-200 text-red-800"
+                    ? "bg-green-200 text-green-800"
+                    : "bg-red-200 text-red-800"
                 }`}
               >
                 {selectedPost.status || "unknown"}

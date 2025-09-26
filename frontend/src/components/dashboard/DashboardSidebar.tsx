@@ -2,20 +2,23 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
-import { JSX, useEffect, useState } from "react";
-import {  Calendar, List, LogOut, User as UserIcon } from "lucide-react"; // modern icons
+import { useEffect, useState, useMemo, JSX } from "react";
+import { Calendar, List, LogOut, User as UserIcon } from "lucide-react";
 
+interface Section {
+  id: string;
+  label: string;
+  icon: JSX.Element;
+}
 
-interface SidebarProps {}
-
-export default function DashboardSidebar({}: SidebarProps) {
+export default function DashboardSidebar() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<string>("social");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = async () => {
-    if (isLoggingOut) return; // prevent double-clicks
+    if (isLoggingOut) return;
     setIsLoggingOut(true);
     try {
       await logout();
@@ -28,13 +31,15 @@ export default function DashboardSidebar({}: SidebarProps) {
     }
   };
 
-  const sections: { id: string; label: string; icon: JSX.Element }[] = [
-    { id: "social", label: "Social Accounts", icon: <UserIcon size={18} /> },
-    { id: "allPosts", label: "All Posts", icon: <List size={18} /> },
-    { id: "scheduler", label: "Scheduler", icon: <Calendar size={18} /> },
-  ];
+  const sections: Section[] = useMemo(
+    () => [
+      { id: "social", label: "Social Accounts", icon: <UserIcon size={18} /> },
+      { id: "allPosts", label: "All Posts", icon: <List size={18} /> },
+      { id: "scheduler", label: "Scheduler", icon: <Calendar size={18} /> },
+    ],
+    []
+  );
 
-  
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -55,13 +60,11 @@ export default function DashboardSidebar({}: SidebarProps) {
 
   return (
     <aside className="w-64 bg-white border-r shadow-sm flex flex-col fixed h-full">
-      
       <div className="p-6 border-b">
         <h1 className="text-xl font-bold text-blue-600 tracking-tight">
           Dashboard
         </h1>
       </div>
-
 
       <div className="p-6 border-b">
         <div className="flex items-center gap-3 mb-4">
@@ -87,7 +90,6 @@ export default function DashboardSidebar({}: SidebarProps) {
         </button>
       </div>
 
-
       <nav className="flex-1 p-4 flex flex-col gap-2 overflow-y-auto">
         {sections.map(({ id, label, icon }) => (
           <button
@@ -109,7 +111,6 @@ export default function DashboardSidebar({}: SidebarProps) {
         ))}
       </nav>
 
-     
       <div className="p-4 border-t text-xs text-gray-400 text-center">
         © {new Date().getFullYear()} Sujit Thakur
       </div>
