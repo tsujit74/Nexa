@@ -1,10 +1,9 @@
-
-
-# Full Stack  AI-Powered Social Media Platform
+# Full Stack AI-Powered Social Media Platform
 
 [🌐 Live Demo](https://nexa-nine-phi.vercel.app/) | [💻 GitHub Repo](https://github.com/tsujit74/Nexa)
 
 ---
+
 ## 🖼️ Screenshot
 
 ![Dashboard Screenshot](/frontend/public/dashboard.png)
@@ -15,9 +14,9 @@
 
 Build a **full stack platform** that helps users:
 
-* Generate content using an AI chatbot.
-* Schedule posts via a calendar interface.
-* Automatically publish posts to social media (currently **Twitter & LinkedIn**, text-only).
+- Generate content using an AI chatbot.
+- Schedule posts via a calendar interface.
+- Automatically publish posts to social media (currently **Twitter & LinkedIn**, text-only).
 
 This platform makes it easier for businesses or individuals to **plan, create, and post content consistently**.
 
@@ -27,35 +26,35 @@ This platform makes it easier for businesses or individuals to **plan, create, a
 
 ### 1. **Social Media Integration**
 
-* Securely connect **Twitter & LinkedIn** accounts using OAuth.
-* Automate posting **text content**.
-* **Instagram** integration is planned (API limitations, posting images/videos not implemented yet).
+- Securely connect **Twitter & LinkedIn** accounts using OAuth.
+- Automate posting **text content**.
+- **Instagram** integration is planned (API limitations, posting images/videos not implemented yet).
 
 ### 2. **AI Chatbot for Content Creation**
 
-* Chatbot collects **business info** from the user.
-* Generates **personalized text posts** dynamically for scheduling.
-* Supports both **dynamic** (interactive) and **static** (simple) post types.
+- Chatbot collects **business info** from the user.
+- Generates **personalized text posts** dynamically for scheduling.
+- Supports both **dynamic** (interactive) and **static** (simple) post types.
 
 ### 3. **Content Calendar & Scheduling**
 
-* **Calendar view** to display all scheduled posts.
-* Posts can be **scheduled** for the future or posted **immediately**.
-* Users can **edit or delete** posts before publishing.
+- **Calendar view** to display all scheduled posts.
+- Posts can be **scheduled** for the future or posted **immediately**.
+- Users can **edit or delete** posts before publishing.
 
 ### 4. **Posting Automation**
 
-* Scheduled posts are automatically sent to **Twitter & LinkedIn**.
-* Immediate posts are created in DB first, then published.
-* Post status updated as `pending → posted → failed`.
+- Scheduled posts are automatically sent to **Twitter & LinkedIn**.
+- Immediate posts are created in DB first, then published.
+- Post status updated as `pending → posted → failed`.
 
 ### 5. **Tech Stack**
 
-* **Backend:** Node.js + Express, MongoDB (Mongoose)
-* **Frontend:** Next.js + React + Tailwind CSS
-* **Scheduling:** `node-cron` (runs every minute to check posts)
-* **AI Content:** Local chatbot simulation (OpenAI can be integrated)
-* **Hosting:** Vercel (frontend), MongoDB Atlas (database)
+- **Backend:** Node.js + Express, MongoDB (Mongoose)
+- **Frontend:** Next.js + React + Tailwind CSS
+- **Scheduling:** `node-cron` (runs every minute to check posts)
+- **AI Content:** Local chatbot simulation (OpenAI can be integrated)
+- **Hosting:** Vercel (frontend), MongoDB Atlas (database)
 
 ---
 
@@ -190,6 +189,7 @@ First, clone the repo and navigate into it:
 
 ```bash
 git clone https://github.com/tsujit74/Nexa
+```
 ````
 
 ### Backend
@@ -208,8 +208,8 @@ npm install
 npm run dev
 ```
 
-* Backend: `http://localhost:4000`
-* Frontend: `http://localhost:3000`
+- Backend: `http://localhost:4000`
+- Frontend: `http://localhost:3000`
 
 ---
 
@@ -222,48 +222,45 @@ npm run dev
 5. **Dashboard** → view/edit posts on calendar.
 6. **Posting**:
 
-   * Immediate → posts instantly.
-   * Scheduled → posted automatically at correct time by `node-cron`.
+   - Immediate → posts instantly.
+   - Scheduled → posted automatically at correct time by `node-cron`.
 
 ---
 
 ## ⚠️ Notes
 
-* Posts are **text-only** for now.
-* Instagram support pending (API restrictions).
-* Scheduler runs **every minute** (optimized for demo; can use queues for scale).
-* Post lifecycle: `pending` → `posted` → `failed`.
+- Posts are **text-only** for now.
+- Instagram support pending (API restrictions).
+- Scheduler runs **every minute** (optimized for demo; can use queues for scale).
+- Post lifecycle: `pending` → `posted` → `failed`.
 
 ---
 
 ## 📌 Next Steps / TODO
 
-* [ ] Add **Instagram posting** (images & videos).
-* [ ] Support **AI-generated images/videos**.
-* [ ] Add **post analytics** (likes, impressions).
-* [ ] Use **job queues** for large-scale scheduling.
+- [ ] Add **Instagram posting** (images & videos).
+- [ ] Support **AI-generated images/videos**.
+- [ ] Add **post analytics** (likes, impressions).
+- [ ] Use **job queues** for large-scale scheduling.
 
 ---
 
 ## ✅ Deliverables
 
-* [x] Full stack working application
-* [x] Twitter & LinkedIn integration
-* [x] AI chatbot (text-only)
-* [x] Content calendar & scheduling
-* [x] Immediate post support
-* [x] Documentation & README
+- [x] Full stack working application
+- [x] Twitter & LinkedIn integration
+- [x] AI chatbot (text-only)
+- [x] Content calendar & scheduling
+- [x] Immediate post support
+- [x] Documentation & README
 
 ---
 
 ## 👨‍💻 Developer Info
 
-**Sujit Thakur**
-📌 Full Stack Developer | Fresher
-🌐 Portfolio: [sujit-porttfolio.vercel.app](https://sujit-porttfolio.vercel.app/)
-💻 GitHub: [github.com/tsujit74](https://github.com/tsujit74)
-✉️ Email: [tsujeet440@gmail.com](mailto:tsujeet440@gmail.com)
-📞 Phone: +91 7479713290
+## 👨‍💻 Author
+
+**Sujit Thakur** — 📌 Full Stack Developer | Fresher  
+🌐 [Portfolio](https://sujit-porttfolio.vercel.app/) | 💻 [GitHub](https://github.com/tsujit74) | ✉️ [Email](mailto:tsujeet440@gmail.com) | 📞 +91-7479713290
 
 ---
-
