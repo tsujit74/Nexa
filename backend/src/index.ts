@@ -22,7 +22,10 @@ import "./cron/postScheduler";
 // Middleware
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    origin: [
+      process.env.FRONTEND_URL || "http://localhost:3000",
+      "https://nexa-nine-phi.vercel.app",
+    ],
     credentials: true,
   })
 );
