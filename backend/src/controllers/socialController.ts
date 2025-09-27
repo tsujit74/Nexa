@@ -154,15 +154,20 @@ export const handleOAuthCallback = async (req: Request, res: Response) => {
         }
       );
 
-      const linkedInId = profileResp.data.sub;
+      const { sub: linkedInId, name, email, picture } = profileResp.data;
       if (!linkedInId)
         return res
           .status(500)
           .json({ message: "Failed to fetch LinkedIn profile" });
-
       user.socialAccounts = {
         ...user.socialAccounts,
-        linkedin: { accessToken: access_token, linkedInId },
+        linkedin: {
+          accessToken: access_token,
+          linkedInId,
+          name,
+          email,
+          photo: picture,
+        },
       };
       user.markModified("socialAccounts");
       await user.save();

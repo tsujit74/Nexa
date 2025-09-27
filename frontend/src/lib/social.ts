@@ -2,7 +2,12 @@ import api from "./api";
 
 export interface SocialAccountsType {
   twitter?: string;
-  linkedin?: string;
+  linkedin?: {
+    accessToken: string;
+    name?: string;
+    email?: string;
+    photo?: string;
+  };
   instagram?: string;
 }
 
@@ -19,9 +24,8 @@ export const startSocialOAuth = async (platform: string) => {
   const token = localStorage.getItem("token"); // JWT token stored in login
   const res = await api.get(`/social/start/${platform}`, {
     headers: {
-      Authorization: `Bearer ${token}`
-    }
+      Authorization: `Bearer ${token}`,
+    },
   });
   return res.data.url;
 };
-

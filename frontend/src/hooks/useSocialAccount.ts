@@ -2,14 +2,15 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/context/ToastContext";
-import { getSocialAccounts, startSocialOAuth } from "@/lib/social";
+import { getSocialAccounts, SocialAccountsType, startSocialOAuth } from "@/lib/social";
 import { useAuthContext } from "@/context/AuthContext";
 
 export const useSocialAccounts = () => {
   const { showToast } = useToast();
   const { loading: authLoading, user, token } = useAuthContext();
 
-  const [accounts, setAccounts] = useState<Record<string, string>>({});
+  const [accounts, setAccounts] = useState<SocialAccountsType>({});
+
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);

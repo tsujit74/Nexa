@@ -4,6 +4,7 @@ import { useEffect, useCallback } from "react";
 import { useSocialAccounts } from "@/hooks/useSocialAccount";
 import { useSearchParams, useRouter } from "next/navigation";
 import { FaTwitter, FaLinkedin, FaInstagram } from "react-icons/fa";
+import { SocialAccountsType } from "@/lib/social";
 
 export default function SocialAccounts() {
   const { accounts, fetching, loading, linkAccount, fetchAccounts, error } =
@@ -24,15 +25,26 @@ export default function SocialAccounts() {
   }, [handleLinked]);
 
   const platforms = [
-    { name: "twitter", icon: <FaTwitter className="text-blue-400" size={20} /> },
-    { name: "linkedin", icon: <FaLinkedin className="text-blue-700" size={20} /> },
-    { name: "instagram", icon: <FaInstagram className="text-pink-500" size={20} /> },
+    {
+      name: "twitter",
+      icon: <FaTwitter className="text-blue-400" size={20} />,
+    },
+    {
+      name: "linkedin",
+      icon: <FaLinkedin className="text-blue-700" size={20} />,
+    },
+    {
+      name: "instagram",
+      icon: <FaInstagram className="text-pink-500" size={20} />,
+    },
   ];
 
   if (fetching) {
     return (
       <div className="flex justify-center items-center p-8 bg-white  shadow-lg">
-        <span className="text-gray-500 text-lg">Loading social accounts...</span>
+        <span className="text-gray-500 text-lg">
+          Loading social accounts...
+        </span>
       </div>
     );
   }
@@ -54,35 +66,66 @@ export default function SocialAccounts() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {platforms.map((platform) => (
-          <div
-            key={platform.name}
-            className="flex flex-col justify-between p-4 border  hover:shadow-md transition duration-200"
-          >
-            <div className="flex items-center gap-3">
-              {platform.icon}
-              <span className="capitalize text-lg font-medium">{platform.name}</span>
-            </div>
+<div
+  key={platform.name}
+  className="flex flex-col p-4 border hover:shadow-md transition duration-200"
+>
+  {/* Top row: icon left, photo right */}
+  <div className="flex justify-between items-start">
+    {/* Icon on top-left */}
+    <div className="flex-shrink-0">{platform.icon}</div>
 
-            {accounts?.[platform.name] ? (
-              <span className="text-green-600 font-semibold bg-green-100 px-2 py-1 rounded text-sm text-center mt-4">
-                Linked
-              </span>
-            ) : (
-              <button
-                disabled={loading}
-                onClick={() => linkAccount(platform.name)}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2  shadow-sm text-sm font-medium transition mt-4 disabled:opacity-50"
-              >
-                {loading ? "Linking..." : "Link Account"}
-              </button>
-            )}
-          </div>
+    {/* Photo on top-right */}
+    {accounts?.[platform.name as keyof SocialAccountsType] &&
+      platform.name === "linkedin" &&
+      accounts.linkedin?.photo && (
+        <img
+          src={accounts.linkedin.photo}
+          alt={accounts.linkedin.name}
+          className="w-10 h-10 rounded-full object-cover"
+        />
+      )}
+  </div>
+
+  {/* Name & Email centered below top row */}
+  <div className="flex flex-col items-center mt-4">
+    {accounts?.[platform.name as keyof SocialAccountsType] &&
+      platform.name === "linkedin" &&
+      accounts.linkedin?.name && (
+        <p className="font-medium text-gray-700">{accounts.linkedin.name}</p>
+      )}
+    {accounts?.[platform.name as keyof SocialAccountsType] &&
+      platform.name === "linkedin" &&
+      accounts.linkedin?.email && (
+        <p className="text-sm text-gray-500">{accounts.linkedin.email}</p>
+      )}
+  </div>
+
+  {/* Bottom: Linked badge or button */}
+  <div className="flex justify-center mt-4">
+    {accounts?.[platform.name as keyof SocialAccountsType] ? (
+      <span className="text-green-600 font-semibold bg-green-100 px-4 py-1 rounded text-sm">
+        Linked
+      </span>
+    ) : (
+      <button
+        disabled={loading}
+        onClick={() => linkAccount(platform.name)}
+        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 shadow-sm text-sm font-medium disabled:opacity-50"
+      >
+        {loading ? "Linking..." : "Link Account"}
+      </button>
+    )}
+  </div>
+</div>
+
         ))}
       </div>
 
       {!accounts || Object.keys(accounts).length === 0 ? (
         <p className="text-gray-500 text-sm mt-4">
-          You have not linked any accounts yet. Click &quot;Link Account&quot; to start posting.
+          You have not linked any accounts yet. Click &quot;Link Account&quot;
+          to start posting.
         </p>
       ) : null}
     </div>

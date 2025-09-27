@@ -12,6 +12,9 @@ export interface ITwitterAccount {
 export interface ILinkedinAccount {
   accessToken: string;
   linkedInId: string;
+  name?: string;
+  email?: string;
+  photo?: string;
   expiresAt?: Date;
 }
 
