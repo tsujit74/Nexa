@@ -3,16 +3,17 @@ import {
   createPost,
   getPosts,
   editPost,
+  immediatePostMiddleware,
 } from "../controllers/postController";
 import { authMiddleware } from "../middleware/authMiddleware";
 import Post from "../models/Post";
+import { createPostMiddleware } from "../middleware/createPostMiddleware";
 
 const router = Router();
 
-
-router.post("/", authMiddleware, createPost);        
-router.get("/", authMiddleware, getPosts);        
-router.put("/:id", authMiddleware, editPost);        
+router.post("/", authMiddleware, createPost);
+router.get("/", authMiddleware, getPosts);
+router.put("/:id", authMiddleware, editPost);
 router.delete("/:id", authMiddleware, async (req, res) => {
   const userId = (req as any).user;
   try {
@@ -23,5 +24,11 @@ router.delete("/:id", authMiddleware, async (req, res) => {
     res.status(500).json({ message: "Error deleting post" });
   }
 });
+router.post(
+  "/post-immediate",
+  authMiddleware,
+  createPostMiddleware,
+  immediatePostMiddleware
+);
 
 export default router;

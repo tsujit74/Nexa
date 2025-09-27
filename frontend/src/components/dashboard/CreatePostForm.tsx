@@ -10,7 +10,7 @@ interface CreatePostFormProps {
 }
 
 export default function CreatePostForm({ initialContent = "" }: CreatePostFormProps) {
-  const { createPost } = usePostsContext();
+  const { createPost, postImmediately } = usePostsContext(); // <-- include immediate post
   const { showToast } = useToast();
   const { accounts } = useSocialAccounts();
 
@@ -21,14 +21,13 @@ export default function CreatePostForm({ initialContent = "" }: CreatePostFormPr
 
   const allPlatforms: ("twitter" | "linkedin" | "instagram")[] = ["twitter", "linkedin", "instagram"];
 
-  // Reset content and selected platforms when initial content or accounts change
   useEffect(() => {
     setContent(initialContent);
     setSelectedPlatforms([]);
   }, [initialContent, accounts]);
 
   const handlePlatformToggle = (platform: "twitter" | "linkedin" | "instagram") => {
-    if (!accounts?.[platform]) return; // cannot select unlinked
+    if (!accounts?.[platform]) return;
     if (selectedPlatforms.includes(platform)) {
       setSelectedPlatforms(selectedPlatforms.filter((p) => p !== platform));
     } else {
@@ -47,47 +46,48 @@ export default function CreatePostForm({ initialContent = "" }: CreatePostFormPr
       return;
     }
 
-    let scheduledDateISO: string | undefined;
-    if (!instant) {
-      if (!scheduledDate) {
-        showToast({ message: "Please select a schedule date & time", type: "error" });
-        return;
-      }
-
-      const selectedDateObj = new Date(scheduledDate);
-      if (selectedDateObj <= new Date()) {
-        showToast({ message: "Scheduled date must be in the future", type: "error" });
-        return;
-      }
-
-      scheduledDateISO = new Date(
-        selectedDateObj.getTime() - selectedDateObj.getTimezoneOffset() * 60000
-      ).toISOString();
-    } else {
-      scheduledDateISO = new Date().toISOString();
-    }
-
     setLoading(true);
-    try {
-      await Promise.all(
-        selectedPlatforms.map((platform) =>
-          createPost({
-            content,
-            scheduledDate: scheduledDateISO,
-            type: "static",
-            platform,
-          })
-        )
-      );
 
+    try {
+      if (instant) {
+        // Immediate post
+        await Promise.all(
+          selectedPlatforms.map((platform) =>
+            postImmediately({ content, platform })
+          )
+        );
+        showToast({ message: "Posted successfully!", type: "success" });
+      } else {
+        // Scheduled post
+        if (!scheduledDate) {
+          showToast({ message: "Please select a schedule date & time", type: "error" });
+          setLoading(false);
+          return;
+        }
+
+        const selectedDateObj = new Date(scheduledDate);
+        if (selectedDateObj <= new Date()) {
+          showToast({ message: "Scheduled date must be in the future", type: "error" });
+          setLoading(false);
+          return;
+        }
+
+        const scheduledDateISO = new Date(
+          selectedDateObj.getTime() - selectedDateObj.getTimezoneOffset() * 60000
+        ).toISOString();
+
+        await Promise.all(
+          selectedPlatforms.map((platform) =>
+            createPost({ content, scheduledDate: scheduledDateISO, type: "static", platform })
+          )
+        );
+        showToast({ message: "Post scheduled successfully!", type: "success" });
+      }
+
+      // Reset form
       setContent("");
       setScheduledDate("");
       setSelectedPlatforms([]);
-
-      showToast({
-        message: instant ? "Posted successfully!" : "Post scheduled successfully!",
-        type: "success",
-      });
     } catch (err) {
       console.error(err);
       showToast({ message: "Failed to create post. Please try again.", type: "error" });
@@ -103,7 +103,7 @@ export default function CreatePostForm({ initialContent = "" }: CreatePostFormPr
       <div className="flex flex-col gap-4">
         <textarea
           placeholder="Write your post or edit chatbot content..."
-          className="border  p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+          className="border p-3 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={4}
@@ -141,7 +141,7 @@ export default function CreatePostForm({ initialContent = "" }: CreatePostFormPr
           <span className="text-gray-700 font-medium">Schedule Date & Time</span>
           <input
             type="datetime-local"
-            className="border  p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="border p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
             value={scheduledDate}
             min={new Date().toISOString().slice(0, 16)}
             onChange={(e) => setScheduledDate(e.target.value)}
@@ -152,14 +152,14 @@ export default function CreatePostForm({ initialContent = "" }: CreatePostFormPr
           <button
             onClick={() => handleSubmit(false)}
             disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2  flex-1 disabled:opacity-50 transition"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 flex-1 disabled:opacity-50 transition"
           >
             {loading ? "Scheduling..." : "Schedule Post"}
           </button>
           <button
             onClick={() => handleSubmit(true)}
             disabled={loading}
-            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2  flex-1 disabled:opacity-50 transition"
+            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 flex-1 disabled:opacity-50 transition"
           >
             {loading ? "Posting..." : "Post Now"}
           </button>

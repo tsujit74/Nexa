@@ -2,8 +2,7 @@
 import cron from "node-cron";
 import { runSchedulerNow } from "../utils/postScheduler";
 
-// Schedule the job to run every minute
 cron.schedule("* * * * *", async () => {
-  console.log("⏱ Running scheduled posts cron job...");
+  console.log("⏱ Scheduled posts cron job started...");
   await runSchedulerNow();
 });

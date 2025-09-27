@@ -1,5 +1,9 @@
 import { Request, Response } from "express";
 import Post from "../models/Post";
+import { postToTwitter } from "../utils/platformTwittter";
+import { postToLinkedIn } from "../utils/platformLinkedIn";
+import User from "../models/User";
+// import { postToInstagram } from "../utils/platformInstagram";
 
 export const createPost = async (req: Request, res: Response) => {
   const userId = (req as any).user;
@@ -47,3 +51,44 @@ export const editPost = async (req: Request, res: Response) => {
   }
 };
 
+
+
+export const immediatePostMiddleware = async (req: Request, res: Response) => {
+  const post = (req as any).post;
+  const userId = (req as any).user;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const platform = post.platform;
+
+    try {
+      // Post to Twitter
+      if (["twitter", "all"].includes(platform) && user.socialAccounts.twitter) {
+        await postToTwitter(post, user.socialAccounts.twitter);
+      }
+
+      // Post to LinkedIn
+      if (["linkedin", "all"].includes(platform) && user.socialAccounts.linkedin) {
+        await postToLinkedIn(post, user.socialAccounts.linkedin);
+      }
+
+      // Instagram (optional)
+      // if (["instagram", "all"].includes(platform) && user.socialAccounts.instagram) {
+      //   await postToInstagram(post, user.socialAccounts.instagram, user.socialAccounts.instagramId);
+      // }
+
+      post.status = "posted";
+      await post.save();
+
+      res.status(200).json({ message: "Post published successfully", post });
+    } catch (err) {
+      post.status = "failed";
+      await post.save();
+      res.status(500).json({ message: "Failed to post immediately", error: err });
+    }
+  } catch (err) {
+    res.status(500).json({ message: "Error in immediate posting", error: err });
+  }
+};

@@ -66,10 +66,33 @@ export function usePosts() {
     }
   };
 
+   const postImmediately = async (data: { content: string; platform: "twitter" | "linkedin" | "instagram" }) => {
+    const tempPost: PostType = {
+      _id: "temp-" + Date.now(),
+      content: data.content,
+      type: "static",
+      platform: data.platform,
+      scheduledDate: new Date().toISOString(),
+      status: "pending",
+    };
+    setPosts(prev => [tempPost, ...prev]);
+
+    try {
+      const newPost = await postsApi.immediatePost(data);
+      setPosts(prev => prev.map(p => (p._id === tempPost._id ? newPost : p)));
+      showToast({ message: `Posted to ${data.platform} successfully!`, type: "success" });
+      return newPost;
+    } catch (err) {
+      setPosts(prev => prev.filter(p => p._id !== tempPost._id));
+      showToast({ message: `Failed to post to ${data.platform}`, type: "error" });
+      throw err;
+    }
+  };
+
  
   useEffect(() => {
     fetchPosts();
   }, []);
 
-  return { posts, setPosts, fetchPosts, createPost, updatePost, deletePost, loading };
+  return { posts, setPosts, fetchPosts, createPost, updatePost, deletePost ,postImmediately, loading };
 }

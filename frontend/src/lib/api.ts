@@ -5,6 +5,7 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
+// Request interceptor: attach token
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("token");
@@ -17,6 +18,25 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   }
   return config;
 });
+
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response) {
+      console.error("API response error:", error.response.data || error.response.statusText);
+      return Promise.reject(error.response.data || { message: "Something went wrong" });
+    } else if (error.request) {
+      // Request made but no response received
+      console.error("API request error:", error.request);
+      return Promise.reject({ message: "No response from server" });
+    } else {
+      // Something else happened
+      console.error("API error:", error.message);
+      return Promise.reject({ message: error.message });
+    }
+  }
+);
 
 // GET request
 export const get = async <T>(url: string, config?: AxiosRequestConfig): Promise<T> => {

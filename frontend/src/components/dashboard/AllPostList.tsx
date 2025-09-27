@@ -39,21 +39,21 @@ export default function AllPostsList() {
   const postedPosts = useMemo(() => posts.filter(p => p.status === "posted"), [posts]);
   const failedPosts = useMemo(() => posts.filter(p => p.status === "failed"), [posts]);
 
-  const formatIST = (dateStr?: string) => {
+  const formatUTC = (dateStr?: string) => {
   if (!dateStr) return "N/A";
   const date = new Date(dateStr);
-
-
   return date.toLocaleString("en-IN", {
-    timeZone: "Asia/Kolkata",
     year: "numeric",
     month: "short",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
     hour12: true,
+    timeZone: "UTC", // show as UTC
   });
 };
+
+
 
 
   const renderPostItem = (post: Post) => (
@@ -61,11 +61,11 @@ export default function AllPostsList() {
       key={post._id}
       className="border p-3  flex flex-col md:flex-row md:justify-between items-start md:items-center gap-2 hover:bg-gray-50 cursor-pointer transition"
       onClick={() => setSelectedPost(post)}
-      aria-label={`Post on ${post.platform} scheduled for ${formatIST(post.scheduledDate)}`}
+      aria-label={`Post on ${post.platform} scheduled for ${formatUTC(post.scheduledDate)}`}
     >
       <div className="flex-1">
         <p className="text-gray-800 font-medium break-words">{post.content || "No Content"}</p>
-        <p className="text-sm text-gray-500">Scheduled: {formatIST(post.scheduledDate)}</p>
+        <p className="text-sm text-gray-500">Scheduled: {formatUTC(post.scheduledDate)}</p>
         <p className="text-sm text-gray-500 capitalize">Platform: {post.platform || "N/A"}</p>
       </div>
       <span
@@ -172,7 +172,7 @@ export default function AllPostsList() {
                 {selectedPost.status || "unknown"}
               </span>
             </p>
-            <p className="mb-2"><strong>Scheduled:</strong> {formatIST(selectedPost.scheduledDate)}</p>
+            <p className="mb-2"><strong>Scheduled:</strong> {formatUTC(selectedPost.scheduledDate)}</p>
           </div>
         </div>
       )}

@@ -10,6 +10,10 @@ export interface PostType {
   platform: "twitter" | "linkedin" | "instagram" | "all";
 }
 
+export const immediatePost = async (data: { content: string; platform: "twitter" | "linkedin" | "instagram" }) => {
+  return post<PostType>("/posts/post-immediate", data);
+};
+
 export const createPost = async (data: Omit<PostType, "_id" | "status">) => {
   return post<PostType>("/posts", data);
 };

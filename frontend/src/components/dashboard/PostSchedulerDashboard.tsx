@@ -43,9 +43,10 @@ export default function PostSchedulerCalendar() {
   useEffect(() => {
     const mapped = filteredPosts.map((post: Post) => ({
       id: post._id,
-      title: `${post.platform.toUpperCase()} - ${
+      title: `${(post.platform || "ALL").toUpperCase()} - ${
         post.content.slice(0, 30) + (post.content.length > 30 ? "..." : "")
       }`,
+
       start: post.scheduledDate,
       color:
         post.status === "posted"
@@ -57,7 +58,15 @@ export default function PostSchedulerCalendar() {
         content: post.content,
         status: post.status,
         platform: post.platform,
-        time: format(new Date(post.scheduledDate), "dd MMM yyyy hh:mm a"),
+        time: new Date(post.scheduledDate).toLocaleString("en-IN", {
+          timeZone: "Asia/Kolkata",
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        }),
       },
     }));
 
@@ -97,7 +106,8 @@ export default function PostSchedulerCalendar() {
           right: "dayGridMonth,timeGridWeek,timeGridDay,listWeek",
         }}
         events={events}
-        height={650}
+        height={600}
+        timeZone="Asia/Kolkata"
         eventClick={(info) => {
           const p = info.event.extendedProps as {
             content: string;
