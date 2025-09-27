@@ -1,25 +1,12 @@
 "use client";
 
-import { useAuth } from "@/hooks/useAuth";
-import DashboardNotFound from "@/components//dashboard/DashbaordNotFound";
 import AuthGuard from "@/components/AuthGaurd";
+import DashboardNotFound from "@/components/dashboard/DashbaordNotFound";
 
 export default function DashboardCatchAll() {
-  const { user, loading } = useAuth();
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p className="text-gray-600">Checking session...</p>
-      </div>
-    );
-  }
-
- 
-  if (!user) {
-    return <AuthGuard children={undefined} />;
-  }
-
-
-  return <DashboardNotFound children={undefined} />;
+  return (
+    <AuthGuard>
+      <DashboardNotFound />
+    </AuthGuard>
+  );
 }

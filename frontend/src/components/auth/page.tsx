@@ -1,7 +1,12 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/context/AuthContext";
+
+interface AxiosErrorLike {
+  response?: { data?: { message?: string } };
+}
 
 export default function AuthPage() {
   const { login, signup, user, loading: authLoading } = useAuthContext();
@@ -31,8 +36,19 @@ export default function AuthPage() {
       } else {
         await signup(name, email, password);
       }
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "Something went wrong.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else if (
+        typeof err === "object" &&
+        err !== null &&
+        "response" in err &&
+        typeof (err as AxiosErrorLike).response?.data?.message === "string"
+      ) {
+        setError((err as AxiosErrorLike).response!.data!.message!);
+      } else {
+        setError("Something went wrong.");
+      }
     } finally {
       setLoading(false);
     }

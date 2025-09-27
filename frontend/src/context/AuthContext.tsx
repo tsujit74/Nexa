@@ -1,5 +1,6 @@
 "use client";
-import React, { createContext, useContext, useState, useEffect } from "react";
+
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import * as authApi from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/context/ToastContext";
@@ -19,6 +20,10 @@ interface AuthContextType {
   logout: () => void;
 }
 
+interface AxiosErrorLike {
+  response?: { data?: { message?: string } };
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -28,32 +33,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { showToast } = useToast();
   const router = useRouter();
 
+  const loadUser = useCallback(async () => {
+    const storedToken = localStorage.getItem("token");
+    if (!storedToken) {
+      setLoading(false);
+      return;
+    }
+
+    setToken(storedToken);
+
+    try {
+      const profile = await authApi.getProfile(storedToken);
+      setUser(profile);
+    } catch (err: unknown) {
+      console.error("Failed to load profile:", err);
+      showToast({ message: "Session expired. Please log in again.", type: "error" });
+      setUser(null);
+      setToken(null);
+      localStorage.removeItem("token");
+    } finally {
+      setLoading(false);
+    }
+  }, [showToast]);
+
   useEffect(() => {
-    const loadUser = async () => {
-      const storedToken = localStorage.getItem("token");
-      if (!storedToken) {
-        setLoading(false);
-        return;
-      }
-
-      setToken(storedToken);
-
-      try {
-        const profile = await authApi.getProfile(storedToken);
-        setUser(profile);
-      } catch (err: any) {
-        console.error("Failed to load profile:", err);
-        showToast({ message: "Session expired. Please log in again.", type: "error" });
-        setUser(null);
-        setToken(null);
-        localStorage.removeItem("token");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     loadUser();
-  }, []);
+  }, [loadUser]);
+
+  const handleError = (err: unknown, fallbackMessage: string) => {
+    if (err instanceof Error) {
+      showToast({ message: err.message, type: "error" });
+    } else if (typeof err === "object" && err !== null && "response" in err) {
+      const e = err as AxiosErrorLike;
+      showToast({ message: e.response?.data?.message || fallbackMessage, type: "error" });
+    } else {
+      showToast({ message: fallbackMessage, type: "error" });
+    }
+  };
 
   const login = async (email: string, password: string) => {
     try {
@@ -61,14 +77,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem("token", res.token);
       setToken(res.token);
       setUser(res.user);
-      showToast({ message: "Welcome back! 🎉", type: "success" });
+      showToast({ message: "Welcome back! ", type: "success" });
       router.push("/dashboard");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Login failed:", err);
-      showToast({
-        message: err?.response?.data?.message || "Invalid email or password.",
-        type: "error",
-      });
+      handleError(err, "Invalid email or password.");
       throw err;
     }
   };
@@ -79,14 +92,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem("token", res.token);
       setToken(res.token);
       setUser(res.user);
-      showToast({ message: "Account created successfully 🎉", type: "success" });
+      showToast({ message: "Account created successfully ", type: "success" });
       router.push("/dashboard");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Signup failed:", err);
-      showToast({
-        message: err?.response?.data?.message || "Signup failed. Try again.",
-        type: "error",
-      });
+      handleError(err, "Signup failed. Try again.");
       throw err;
     }
   };
@@ -95,7 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem("token");
     setToken(null);
     setUser(null);
-    showToast({ message: "Logged out successfully 👋", type: "success" });
+    showToast({ message: "Logged out successfully", type: "success" });
   };
 
   return (

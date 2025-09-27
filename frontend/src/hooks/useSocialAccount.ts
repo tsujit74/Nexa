@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useToast } from "@/context/ToastContext";
 import { getSocialAccounts, startSocialOAuth } from "@/lib/social";
 import { useAuthContext } from "@/context/AuthContext";
@@ -14,7 +14,7 @@ export const useSocialAccounts = () => {
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAccounts = async () => {
+  const fetchAccounts = useCallback(async () => {
     if (!token) {
       setError("No authentication token found");
       setFetching(false);
@@ -28,14 +28,14 @@ export const useSocialAccounts = () => {
       const data = await getSocialAccounts(token);
       setAccounts(data || {});
       showToast({ message: "Accounts loaded successfully", type: "success" });
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Fetch accounts error:", err);
       setError("Failed to load accounts");
       showToast({ message: "Failed to load linked accounts", type: "error" });
     } finally {
       setFetching(false);
     }
-  };
+  }, [token, showToast]);
 
   const linkAccount = async (platform: string, onLinked?: () => void) => {
     if (!token) {
@@ -51,7 +51,7 @@ export const useSocialAccounts = () => {
         window.location.href = url;
       }
       if (onLinked) onLinked();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
       showToast({ message: `Failed to link ${platform} account`, type: "error" });
     } finally {
@@ -65,7 +65,7 @@ export const useSocialAccounts = () => {
     } else if (!user && !authLoading) {
       setFetching(false);
     }
-  }, [authLoading, user, token]);
+  }, [authLoading, user, token, fetchAccounts]);
 
   return {
     accounts,
