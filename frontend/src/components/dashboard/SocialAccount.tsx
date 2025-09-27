@@ -17,7 +17,7 @@ export default function SocialAccounts() {
       fetchAccounts();
       router.replace("/dashboard");
     }
-  }, [params, fetchAccounts, router]);
+  }, [params, router]);
 
   useEffect(() => {
     handleLinked();

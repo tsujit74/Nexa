@@ -69,7 +69,7 @@ export function usePosts() {
  
   useEffect(() => {
     fetchPosts();
-  }, [fetchPosts]);
+  }, []);
 
   return { posts, setPosts, fetchPosts, createPost, updatePost, deletePost, loading };
 }

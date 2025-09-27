@@ -61,14 +61,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [loadUser]);
 
   const handleError = (err: unknown, fallbackMessage: string) => {
-    if (err instanceof Error) {
-      showToast({ message: err.message, type: "error" });
-    } else if (typeof err === "object" && err !== null && "response" in err) {
+    if (typeof err === "object" && err !== null && "response" in err) {
       const e = err as AxiosErrorLike;
-      showToast({ message: e.response?.data?.message || fallbackMessage, type: "error" });
-    } else {
-      showToast({ message: fallbackMessage, type: "error" });
+      if (e.response?.data?.message) {
+        showToast({ message: e.response.data.message, type: "error" });
+        return e.response.data.message;
+      }
     }
+    showToast({ message: fallbackMessage, type: "error" });
+    return fallbackMessage;
   };
 
   const login = async (email: string, password: string) => {
@@ -77,12 +78,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem("token", res.token);
       setToken(res.token);
       setUser(res.user);
-      showToast({ message: "Welcome back! ", type: "success" });
+      showToast({ message: "Welcome back! 🎉", type: "success" });
       router.push("/dashboard");
     } catch (err: unknown) {
-      console.error("Login failed:", err);
-      handleError(err, "Invalid email or password.");
-      throw err;
+      const message = handleError(err, "Invalid email or password.");
+      throw new Error(message);
     }
   };
 
@@ -92,12 +92,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       localStorage.setItem("token", res.token);
       setToken(res.token);
       setUser(res.user);
-      showToast({ message: "Account created successfully ", type: "success" });
+      showToast({ message: "Account created successfully! 🎉", type: "success" });
       router.push("/dashboard");
     } catch (err: unknown) {
-      console.error("Signup failed:", err);
-      handleError(err, "Signup failed. Try again.");
-      throw err;
+      const message = handleError(err, "Signup failed. Try again.");
+      throw new Error(message);
     }
   };
 
@@ -117,8 +116,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuthContext = () => {
   const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuthContext must be used inside AuthProvider");
-  }
+  if (!ctx) throw new Error("useAuthContext must be used inside AuthProvider");
   return ctx;
 };

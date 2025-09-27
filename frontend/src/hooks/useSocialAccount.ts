@@ -65,7 +65,7 @@ export const useSocialAccounts = () => {
     } else if (!user && !authLoading) {
       setFetching(false);
     }
-  }, [authLoading, user, token, fetchAccounts]);
+  }, []);
 
   return {
     accounts,

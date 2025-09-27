@@ -29,11 +29,11 @@ export default function AllPostsList() {
     } finally {
       setLoading(false);
     }
-  }, [fetchPosts]);
+  }, []);
 
   useEffect(() => {
     loadPosts();
-  }, [loadPosts]);
+  }, []);
 
   const pendingPosts = useMemo(() => posts.filter(p => p.status === "pending"), [posts]);
   const postedPosts = useMemo(() => posts.filter(p => p.status === "posted"), [posts]);
