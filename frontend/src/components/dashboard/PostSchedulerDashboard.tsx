@@ -44,7 +44,7 @@ export default function PostSchedulerCalendar() {
     const mapped = filteredPosts.map((post: Post) => ({
       id: post._id,
       title: `${(post.platform || "ALL").toUpperCase()} - ${
-        post.content.slice(0, 30) + (post.content.length > 30 ? "..." : "")
+        (post.content || "").slice(0, 30) + ((post.content||"").length > 30 ? "..." : "")
       }`,
 
       start: post.scheduledDate,
