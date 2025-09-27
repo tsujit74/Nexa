@@ -48,10 +48,11 @@ export default function EditPostForm({ post, onClose }: EditPostFormProps) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-      <div className="bg-white p-6 shadow-lg w-11/12 md:w-1/2 relative rounded-md">
+   <div className="fixed inset-0 bg-opacity-500 bg-black/40 flex transprent justify-center items-center z-50">
+
+      <div className="bg-white p-6 shadow-lg w-11/12 md:w-1/2 relative ">
         <button
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+          className="absolute top-3 right-3 text-gray-500 hover:text-gray-300 cursor-pointer "
           onClick={onClose}
         >
           <X size={20} />
@@ -63,7 +64,7 @@ export default function EditPostForm({ post, onClose }: EditPostFormProps) {
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border  px-3 py-2"
               rows={3}
               required
             />
@@ -74,7 +75,7 @@ export default function EditPostForm({ post, onClose }: EditPostFormProps) {
               type="datetime-local"
               value={scheduledDate}
               onChange={(e) => setScheduledDate(e.target.value)}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border  px-3 py-2"
               min={new Date().toISOString().slice(0, 16)} // prevent past dates
               required
             />
@@ -84,7 +85,7 @@ export default function EditPostForm({ post, onClose }: EditPostFormProps) {
             <select
               value={platform}
               onChange={(e) => setPlatform(e.target.value as PostType["platform"])}
-              className="w-full border rounded px-3 py-2"
+              className="w-full border  px-3 py-2"
             >
               <option value="twitter">Twitter</option>
               <option value="linkedin">LinkedIn</option>
@@ -94,7 +95,7 @@ export default function EditPostForm({ post, onClose }: EditPostFormProps) {
           </div>
           <button
             type="submit"
-            className={`w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 ${
+            className={`w-full bg-blue-600 text-white px-4 py-2  hover:bg-blue-700 ${
               saving ? "opacity-50 cursor-not-allowed" : ""
             }`}
             disabled={saving}
