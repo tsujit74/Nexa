@@ -40,17 +40,21 @@ export default function AllPostsList() {
   const failedPosts = useMemo(() => posts.filter(p => p.status === "failed"), [posts]);
 
   const formatIST = (dateStr?: string) => {
-    if (!dateStr) return "N/A";
-    const date = new Date(dateStr);
-    return new Date(date.getTime() + 5.5 * 60 * 60000).toLocaleString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
+  if (!dateStr) return "N/A";
+  const date = new Date(dateStr);
+
+
+  return date.toLocaleString("en-IN", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
 
   const renderPostItem = (post: Post) => (
     <div
