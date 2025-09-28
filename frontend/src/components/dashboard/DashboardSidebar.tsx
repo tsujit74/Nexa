@@ -60,7 +60,7 @@ export default function DashboardSidebar() {
   }, [sections, user]);
 
   return (
-    <aside className="w-64 bg-white border-r shadow-sm flex flex-col fixed h-full">
+    <aside className="w-80 bg-white border-r shadow-sm flex flex-col fixed h-full">
       <div className="p-6 border-b">
         <h1 className="text-xl font-bold text-blue-600 tracking-tight">
           Dashboard
@@ -86,7 +86,7 @@ export default function DashboardSidebar() {
           <button
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className="flex items-center gap-2 w-full bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 text-sm font-medium transition"
+            className="flex items-center gap-2 w-full bg-red-500 hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2  text-sm font-medium transition"
           >
             <LogOut size={16} />
             {isLoggingOut ? "Logging out..." : "Logout"}
@@ -94,13 +94,16 @@ export default function DashboardSidebar() {
         ) : (
           <button
             onClick={() => router.push("/dashboard")}
-            className="flex items-center gap-2 w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 text-sm font-medium transition"
+            className="flex items-center gap-2 w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2  text-sm font-medium transition"
           >
             <LogIn size={16} />
             Login
           </button>
         )}
+
       </div>
+
+      
 
       {user ? (
         <nav className="flex-1 p-4 flex flex-col gap-2 overflow-y-auto">
@@ -110,7 +113,7 @@ export default function DashboardSidebar() {
               onClick={() =>
                 document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })
               }
-              className={`flex items-center gap-3 px-4 py-2 font-medium transition ${
+              className={`flex items-center gap-3 px-4 py-2  font-medium transition ${
                 activeSection === id
                   ? "bg-blue-100 text-blue-600"
                   : "text-gray-700 hover:bg-blue-50"
@@ -126,6 +129,8 @@ export default function DashboardSidebar() {
           Please login to access dashboard features
         </div>
       )}
+
+      
 
       <div className="p-4 border-t text-xs text-gray-400 text-center">
         © {new Date().getFullYear()} Sujit Thakur

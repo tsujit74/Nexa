@@ -36,65 +36,57 @@ export default function CreatePostForm({ initialContent = "" }: CreatePostFormPr
   };
 
   const handleSubmit = async (instant = false) => {
-    if (!content.trim()) {
-      showToast({ message: "Post content cannot be empty", type: "error" });
-      return;
-    }
+  if (!content.trim()) {
+    showToast({ message: "Post content cannot be empty", type: "error" });
+    return;
+  }
 
-    if (selectedPlatforms.length === 0) {
-      showToast({ message: "Please select at least one platform", type: "error" });
-      return;
-    }
+  if (selectedPlatforms.length === 0) {
+    showToast({ message: "Please select at least one platform", type: "error" });
+    return;
+  }
 
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      if (instant) {
-        // Immediate post
-        await Promise.all(
-          selectedPlatforms.map((platform) =>
-            postImmediately({ content, platform })
-          )
-        );
-        showToast({ message: "Posted successfully!", type: "success" });
-      } else {
-        // Scheduled post
-        if (!scheduledDate) {
-          showToast({ message: "Please select a schedule date & time", type: "error" });
-          setLoading(false);
-          return;
-        }
-
-        const selectedDateObj = new Date(scheduledDate);
-        if (selectedDateObj <= new Date()) {
-          showToast({ message: "Scheduled date must be in the future", type: "error" });
-          setLoading(false);
-          return;
-        }
-
-        const scheduledDateISO = new Date(
-          selectedDateObj.getTime() - selectedDateObj.getTimezoneOffset() * 60000
-        ).toISOString();
-
-        await Promise.all(
-          selectedPlatforms.map((platform) =>
-            createPost({ content, scheduledDate: scheduledDateISO, type: "static", platform })
-          )
-        );
-        showToast({ message: "Post scheduled successfully!", type: "success" });
+  try {
+    if (instant) {
+      await Promise.all(selectedPlatforms.map(p => postImmediately({ content, platform: p })));
+      showToast({ message: "Posted successfully!", type: "success" });
+    } else {
+      if (!scheduledDate) {
+        showToast({ message: "Please select a schedule date & time", type: "error" });
+        setLoading(false);
+        return;
       }
 
-      // Reset form
-      setContent("");
-      setScheduledDate("");
-      setSelectedPlatforms([]);
-    } catch (err) {
-      console.error(err);
-      showToast({ message: "Failed to create post. Please try again.", type: "error" });
-    } finally {
-      setLoading(false);
+      const scheduledDateISO = new Date(
+        new Date(scheduledDate).getTime() - new Date(scheduledDate).getTimezoneOffset() * 60000
+      ).toISOString();
+
+      await Promise.all(
+        selectedPlatforms.map(p => createPost({ content, scheduledDate: scheduledDateISO, type: "static", platform: p }))
+      );
+
+      showToast({ message: "Post scheduled successfully!", type: "success" });
     }
-  };
+
+    // Reset form
+    setContent("");
+    setScheduledDate("");
+    setSelectedPlatforms([]);
+  } catch (err: any) {
+    // Extract backend message if available
+    const backendMessage =
+      err?.response?.data?.message ||
+      err?.message ||
+      "Failed to create post. Please try again.";
+
+    showToast({ message: backendMessage, type: "error" });
+    console.error("Post creation error:", err);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="bg-white p-6 w-full">

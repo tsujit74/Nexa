@@ -46,16 +46,25 @@ export const editPost = async (req: Request, res: Response) => {
   if (!content && !type && !scheduledDate && !platform) {
     return res
       .status(400)
-      .json({ message: "At least one field (content, type, scheduledDate, platform) must be provided to update" });
+      .json({
+        message:
+          "At least one field (content, type, scheduledDate, platform) must be provided to update",
+      });
   }
 
   const allowedTypes = ["dynamic", "static"];
   const allowedPlatforms = ["twitter", "linkedin", "instagram", "all"];
   if (type && !allowedTypes.includes(type)) {
-    return res.status(400).json({ message: `Invalid type. Allowed: ${allowedTypes.join(", ")}` });
+    return res
+      .status(400)
+      .json({ message: `Invalid type. Allowed: ${allowedTypes.join(", ")}` });
   }
   if (platform && !allowedPlatforms.includes(platform)) {
-    return res.status(400).json({ message: `Invalid platform. Allowed: ${allowedPlatforms.join(", ")}` });
+    return res
+      .status(400)
+      .json({
+        message: `Invalid platform. Allowed: ${allowedPlatforms.join(", ")}`,
+      });
   }
 
   try {
@@ -68,7 +77,9 @@ export const editPost = async (req: Request, res: Response) => {
 
     // Only allow editing pending posts
     if (post.status !== "pending") {
-      return res.status(403).json({ message: "Only pending posts can be edited" });
+      return res
+        .status(403)
+        .json({ message: "Only pending posts can be edited" });
     }
 
     // Update fields dynamically
@@ -91,7 +102,6 @@ export const editPost = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Error updating post", error: err });
   }
 };
-
 
 export const immediatePostMiddleware = async (req: Request, res: Response) => {
   const post = (req as any).post;

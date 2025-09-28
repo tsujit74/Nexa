@@ -41,7 +41,7 @@ export default function DashboardPage() {
       <div className="min-h-screen flex bg-gray-100">
         <DashboardSidebar />
 
-        <main className="flex-1 p-8 ml-64 space-y-10">
+        <main className="flex-1 p-8 ml-80 space-y-10">
           {/* Social Accounts */}
           <section id="social">
             <h2 className="text-3xl font-bold mb-4 text-gray-800 border-b pb-2">
