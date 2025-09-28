@@ -10,24 +10,34 @@ interface CreatePostFormProps {
   initialContent?: string;
 }
 
-export default function CreatePostForm({ initialContent = "" }: CreatePostFormProps) {
+export default function CreatePostForm({
+  initialContent = "",
+}: CreatePostFormProps) {
   const { createPost, postImmediately } = usePostsContext(); // <-- include immediate post
   const { showToast } = useToast();
   const { accounts } = useSocialAccounts();
 
   const [content, setContent] = useState(initialContent);
   const [scheduledDate, setScheduledDate] = useState("");
-  const [selectedPlatforms, setSelectedPlatforms] = useState<("twitter" | "linkedin" | "instagram")[]>([]);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<
+    ("twitter" | "linkedin" | "instagram")[]
+  >([]);
   const [loading, setLoading] = useState(false);
 
-  const allPlatforms: ("twitter" | "linkedin" | "instagram")[] = ["twitter", "linkedin", "instagram"];
+  const allPlatforms: ("twitter" | "linkedin" | "instagram")[] = [
+    "twitter",
+    "linkedin",
+    "instagram",
+  ];
 
   useEffect(() => {
     setContent(initialContent);
     setSelectedPlatforms([]);
   }, [initialContent, accounts]);
 
-  const handlePlatformToggle = (platform: "twitter" | "linkedin" | "instagram") => {
+  const handlePlatformToggle = (
+    platform: "twitter" | "linkedin" | "instagram"
+  ) => {
     if (!accounts?.[platform]) return;
     if (selectedPlatforms.includes(platform)) {
       setSelectedPlatforms(selectedPlatforms.filter((p) => p !== platform));
@@ -36,36 +46,63 @@ export default function CreatePostForm({ initialContent = "" }: CreatePostFormPr
     }
   };
 
-  const handleSubmit = async (instant = false) => {
+ const handleSubmit = async (instant = false) => {
   if (!content.trim()) {
     showToast({ message: "Post content cannot be empty", type: "error" });
     return;
   }
 
   if (selectedPlatforms.length === 0) {
-    showToast({ message: "Please select at least one platform", type: "error" });
+    showToast({
+      message: "Please select at least one platform",
+      type: "error",
+    });
     return;
   }
 
   setLoading(true);
 
+  const extractBackendMessage = (err: unknown, fallbackMessage: string) => {
+    if (err instanceof AxiosError) {
+      return err.response?.data?.message || fallbackMessage;
+    } else if (err instanceof Error) {
+      return err.message;
+    }
+    return fallbackMessage;
+  };
+
   try {
     if (instant) {
-      await Promise.all(selectedPlatforms.map(p => postImmediately({ content, platform: p })));
+      await Promise.all(
+        selectedPlatforms.map((p) =>
+          postImmediately({ content, platform: p })
+        )
+      );
       showToast({ message: "Posted successfully!", type: "success" });
     } else {
       if (!scheduledDate) {
-        showToast({ message: "Please select a schedule date & time", type: "error" });
+        showToast({
+          message: "Please select a schedule date & time",
+          type: "error",
+        });
         setLoading(false);
         return;
       }
 
       const scheduledDateISO = new Date(
-        new Date(scheduledDate).getTime() - new Date(scheduledDate).getTimezoneOffset() * 60000
+        new Date(scheduledDate).getTime() -
+          new Date(scheduledDate).getTimezoneOffset() * 60000
       ).toISOString();
 
       await Promise.all(
-        selectedPlatforms.map(p => createPost({ content, scheduledDate: scheduledDateISO, type: "static", platform: p }))
+        selectedPlatforms.map((p) =>
+          createPost({
+            content,
+            scheduledDate: scheduledDateISO,
+            type: "static",
+            platform: p,
+          })
+        )
       );
 
       showToast({ message: "Post scheduled successfully!", type: "success" });
@@ -75,24 +112,21 @@ export default function CreatePostForm({ initialContent = "" }: CreatePostFormPr
     setContent("");
     setScheduledDate("");
     setSelectedPlatforms([]);
-  }catch (err: unknown) {
-  let backendMessage = "Failed to create post. Please try again.";
-
-  if (err instanceof AxiosError) {
-    backendMessage = err.response?.data?.message || backendMessage;
-  } else if (err instanceof Error) {
-    backendMessage = err.message;
+  } catch (err: unknown) {
+    const message = extractBackendMessage(err, "Failed to create post. Please try again.");
+    showToast({ message, type: "error" });
+    console.error("Post creation error:", err);
+  } finally {
+    setLoading(false);
   }
-
-  showToast({ message: backendMessage, type: "error" });
-  console.error("Post creation error:", err);
-}
-
 };
+
 
   return (
     <div className="bg-white p-6 w-full">
-      <h3 className="text-2xl font-semibold mb-4 text-gray-800">Create New Post</h3>
+      <h3 className="text-2xl font-semibold mb-4 text-gray-800">
+        Create New Post
+      </h3>
 
       <div className="flex flex-col gap-4">
         <textarea
@@ -122,7 +156,11 @@ export default function CreatePostForm({ initialContent = "" }: CreatePostFormPr
                         : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
                       : "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
                   }`}
-                  title={!isLinked ? `Please link your ${platform} account first` : ""}
+                  title={
+                    !isLinked
+                      ? `Please link your ${platform} account first`
+                      : ""
+                  }
                 >
                   {platform.charAt(0).toUpperCase() + platform.slice(1)}
                 </button>
@@ -132,7 +170,9 @@ export default function CreatePostForm({ initialContent = "" }: CreatePostFormPr
         </div>
 
         <label className="flex flex-col gap-1">
-          <span className="text-gray-700 font-medium">Schedule Date & Time</span>
+          <span className="text-gray-700 font-medium">
+            Schedule Date & Time
+          </span>
           <input
             type="datetime-local"
             className="border p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
