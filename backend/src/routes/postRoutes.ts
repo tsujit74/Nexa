@@ -24,7 +24,7 @@ router.post(
 router.get("/", authMiddleware, getPosts);
 
 // Edit post
-router.put("/:id", authMiddleware, editPost);
+router.put("/:id", authMiddleware,dailyPostLimitMiddleware, editPost);
 
 // Delete post
 router.delete("/:id", authMiddleware, async (req, res) => {
