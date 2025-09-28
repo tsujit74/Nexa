@@ -116,12 +116,20 @@ export default function SocialAccounts() {
                 </span>
               ) : (
                 <button
-                  disabled={loading}
-                  onClick={() => linkAccount(platform.name)}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 shadow-sm text-sm font-medium disabled:opacity-50"
-                >
-                  {loading ? "Linking..." : "Link Account"}
-                </button>
+  disabled={loading || platform.name === "instagram"} // Disable Instagram
+  onClick={() => linkAccount(platform.name)}
+  className={`bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 shadow-sm text-sm font-medium disabled:opacity-50 ${
+    platform.name === "instagram" ? "cursor-not-allowed opacity-50" : ""
+  }`}
+  title={
+    platform.name === "instagram"
+      ? "Instagram linking is currently disabled"
+      : ""
+  }
+>
+  {platform.name === "instagram" ? "Unavailable" : loading ? "Linking..." : "Link Account"}
+</button>
+
               )}
             </div>
           </div>

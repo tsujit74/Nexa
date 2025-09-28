@@ -10,6 +10,7 @@ import { PostsProvider } from "@/context/PostContext";
 import FloatingChatbot from "@/components/dashboard/FlaotingChatbot";
 import { useAuthContext } from "@/context/AuthContext";  
 import AuthPage from "@/components/auth/page";       
+import Disclaimer from "@/components/Disclaimer/Disclaimer";
 export default function DashboardPage() {
   const [generatedContent, setGeneratedContent] = useState("");
   const { token, loading } = useAuthContext();
@@ -41,7 +42,8 @@ export default function DashboardPage() {
       <div className="min-h-screen flex bg-gray-100">
         <DashboardSidebar />
 
-        <main className="flex-1 p-8 ml-80 space-y-10">
+        <main className="flex-1 p-8 ml-80 space-y-8">
+          <Disclaimer/>
           {/* Social Accounts */}
           <section id="social">
             <h2 className="text-3xl font-bold mb-4 text-gray-800 border-b pb-2">
