@@ -7,7 +7,6 @@ import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import listPlugin from "@fullcalendar/list";
 import { useState, useEffect, useMemo } from "react";
-import { format } from "date-fns";
 import { usePostsContext } from "@/context/PostContext";
 
 interface Post {

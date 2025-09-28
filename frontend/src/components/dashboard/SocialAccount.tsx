@@ -5,6 +5,7 @@ import { useSocialAccounts } from "@/hooks/useSocialAccount";
 import { useSearchParams, useRouter } from "next/navigation";
 import { FaTwitter, FaLinkedin, FaInstagram } from "react-icons/fa";
 import { SocialAccountsType } from "@/lib/social";
+import Image from "next/image";
 
 export default function SocialAccounts() {
   const { accounts, fetching, loading, linkAccount, fetchAccounts, error } =
@@ -79,9 +80,10 @@ export default function SocialAccounts() {
     {accounts?.[platform.name as keyof SocialAccountsType] &&
       platform.name === "linkedin" &&
       accounts.linkedin?.photo && (
-        <img
+        <Image
           src={accounts.linkedin.photo}
-          alt={accounts.linkedin.name}
+          alt={accounts.linkedin.name || "Prfile Picture"}
+          fill
           className="w-10 h-10 rounded-full object-cover"
         />
       )}

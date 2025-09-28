@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { usePostsContext } from "@/context/PostContext";
 import { useToast } from "@/context/ToastContext";
 import { useSocialAccounts } from "@/hooks/useSocialAccount";
+import { AxiosError } from "axios";
 
 interface CreatePostFormProps {
   initialContent?: string;
@@ -74,18 +75,19 @@ export default function CreatePostForm({ initialContent = "" }: CreatePostFormPr
     setContent("");
     setScheduledDate("");
     setSelectedPlatforms([]);
-  } catch (err: any) {
-    // Extract backend message if available
-    const backendMessage =
-      err?.response?.data?.message ||
-      err?.message ||
-      "Failed to create post. Please try again.";
+  }catch (err: unknown) {
+  let backendMessage = "Failed to create post. Please try again.";
 
-    showToast({ message: backendMessage, type: "error" });
-    console.error("Post creation error:", err);
-  } finally {
-    setLoading(false);
+  if (err instanceof AxiosError) {
+    backendMessage = err.response?.data?.message || backendMessage;
+  } else if (err instanceof Error) {
+    backendMessage = err.message;
   }
+
+  showToast({ message: backendMessage, type: "error" });
+  console.error("Post creation error:", err);
+}
+
 };
 
   return (
