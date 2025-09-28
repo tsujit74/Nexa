@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="Social SaaS Badge">
+  <title>Social SaaS Badge</title>
+
+  <!-- Outer round outline -->
+  <circle cx="60" cy="60" r="55" fill="none" stroke="#4338CA" stroke-width="4"></circle> <!-- Indigo outline -->
+
+  <!-- Central idea: lightbulb + pencil (creativity + tech) -->
+  <g transform="translate(40,28)">
+    <!-- Bulb glass -->
+    <circle cx="20" cy="20" r="18" fill="none" stroke="#0EA5E9" stroke-width="3"></circle> <!-- Sky blue -->
+    <!-- Pencil inside -->
+    <rect x="18" y="10" width="4" height="16" rx="1" fill="#FACC15"></rect> <!-- Yellow -->
+    <polygon points="20,26 16,34 24,34" fill="#4338CA"></polygon> <!-- Indigo tip -->
+  </g>
+
+  <!-- Small spark stars (AI/creativity) -->
+  <g stroke="#FACC15" stroke-width="2" stroke-linecap="round">
+    <line x1="60" y1="12" x2="60" y2="18"></line>
+    <line x1="60" y1="42" x2="60" y2="48"></line>
+    <line x1="42" y1="30" x2="36" y2="30"></line>
+    <line x1="84" y1="30" x2="78" y2="30"></line>
+  </g>
+
+  <!-- Tiny platform hints -->
+  <!-- Twitter-like chat bubble -->
+  <g transform="translate(20,80)">
+    <rect x="0" y="0" width="20" height="14" rx="3" fill="#fff" stroke="#0EA5E9" stroke-width="2"></rect>
+    <path d="M5 6h10" stroke="#0EA5E9" stroke-width="2" stroke-linecap="round"></path>
+  </g>
+  <!-- LinkedIn-like briefcase -->
+  <g transform="translate(50,85)">
+    <rect x="0" y="0" width="20" height="14" rx="3" fill="#fff" stroke="#4338CA" stroke-width="2"></rect>
+    <rect x="4" y="4" width="12" height="6" rx="1" fill="#0EA5E9"></rect>
+  </g>
+  <!-- Instagram-like camera -->
+  <g transform="translate(80,80)">
+    <rect x="0" y="0" width="20" height="14" rx="3" fill="#fff" stroke="#FACC15" stroke-width="2"></rect>
+    <circle cx="10" cy="7" r="3.5" fill="#0EA5E9"></circle>
+    <rect x="14" y="2" width="3" height="3" rx="1" fill="#4338CA"></rect>
+  </g>
+</svg>
