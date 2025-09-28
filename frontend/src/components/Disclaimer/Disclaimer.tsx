@@ -14,15 +14,16 @@ export default function Disclaimer() {
         </svg>
       </div>
       <div className="flex flex-col">
-        <p className="text-yellow-800 font-semibold">⚠ Posting & Scheduling Notice</p>
-        <p className="text-yellow-700 text-sm">
-          You can schedule up to <strong>3 posts per day</strong>. 
-          Scheduled posts may take up to <strong>30 minutes</strong> to go live. 
-          If you want your post to publish immediately, use the <strong>"Post Now"</strong> button. 
-          Currently, posting works only for <strong>Twitter</strong> and <strong>LinkedIn</strong>. 
-          Instagram posting is not supported due to API restrictions. Please plan your posts accordingly.
-        </p>
-      </div>
+  <p className="text-yellow-800 font-semibold">⚠ Posting & Scheduling Notice</p>
+  <p className="text-yellow-700 text-sm">
+    You can schedule up to <strong>3 posts per day</strong>. 
+    Scheduled posts may take up to <strong>30 minutes</strong> to go live. 
+    If you want your post to publish immediately, use the <strong>&quot;Post Now&quot;</strong> button. 
+    Currently, posting works only for <strong>Twitter</strong> and <strong>LinkedIn</strong>. 
+    Instagram posting is not supported due to API restrictions. Please plan your posts accordingly.
+  </p>
+</div>
+
     </div>
   );
 }
