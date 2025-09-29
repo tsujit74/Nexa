@@ -3,6 +3,7 @@ import Post from "../models/Post";
 import { postToTwitter } from "../utils/platformTwittter";
 import { postToLinkedIn } from "../utils/platformLinkedIn";
 import User from "../models/User";
+import { postToInstagram } from "../utils/platformInstagram";
 // import { postToInstagram } from "../utils/platformInstagram";
 
 export const createPost = async (req: Request, res: Response) => {
@@ -44,12 +45,10 @@ export const editPost = async (req: Request, res: Response) => {
 
   // Validate input
   if (!content && !type && !scheduledDate && !platform) {
-    return res
-      .status(400)
-      .json({
-        message:
-          "At least one field (content, type, scheduledDate, platform) must be provided to update",
-      });
+    return res.status(400).json({
+      message:
+        "At least one field (content, type, scheduledDate, platform) must be provided to update",
+    });
   }
 
   const allowedTypes = ["dynamic", "static"];
@@ -60,11 +59,9 @@ export const editPost = async (req: Request, res: Response) => {
       .json({ message: `Invalid type. Allowed: ${allowedTypes.join(", ")}` });
   }
   if (platform && !allowedPlatforms.includes(platform)) {
-    return res
-      .status(400)
-      .json({
-        message: `Invalid platform. Allowed: ${allowedPlatforms.join(", ")}`,
-      });
+    return res.status(400).json({
+      message: `Invalid platform. Allowed: ${allowedPlatforms.join(", ")}`,
+    });
   }
 
   try {
@@ -131,9 +128,17 @@ export const immediatePostMiddleware = async (req: Request, res: Response) => {
       }
 
       // Instagram (optional)
-      // if (["instagram", "all"].includes(platform) && user.socialAccounts.instagram) {
-      //   await postToInstagram(post, user.socialAccounts.instagram, user.socialAccounts.instagramId);
-      // }
+      if (
+        ["instagram", "all"].includes(post.platform) &&
+        user.socialAccounts.instagram?.accessToken &&
+        user.socialAccounts.instagram?.instagramBusinessId
+      ) {
+        await postToInstagram(post, {
+          accessToken: user.socialAccounts.instagram.accessToken,
+          instagramBusinessId:
+            user.socialAccounts.instagram.instagramBusinessId,
+        });
+      }
 
       post.status = "posted";
       await post.save();

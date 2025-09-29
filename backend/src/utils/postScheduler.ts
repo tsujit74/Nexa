@@ -64,7 +64,7 @@ export const runSchedulerNow = async () => {
           await postToLinkedIn(post, user.socialAccounts.linkedin);
         }
 
-        //Instagram (optional)
+        
         if (
           ["instagram", "all"].includes(post.platform) &&
           user.socialAccounts.instagram?.accessToken &&
