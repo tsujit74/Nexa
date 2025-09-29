@@ -58,13 +58,13 @@ export const startOAuth = async (req: AuthRequest, res: Response) => {
 
     if (platform === "instagram") {
       const callbackUrl = process.env.INSTAGRAM_CALLBACK_URL!;
-      const state = req.token;
+      const state = req.token; // JWT or unique string to identify user
 
-      const url = `https://api.instagram.com/oauth/authorize?client_id=${
+      const url = `https://www.facebook.com/v17.0/dialog/oauth?client_id=${
         process.env.INSTAGRAM_CLIENT_ID
       }&redirect_uri=${encodeURIComponent(
         callbackUrl
-      )}&scope=user_profile,user_media&response_type=code&state=${state}`;
+      )}&scope=instagram_basic,instagram_content_publish,pages_show_list,pages_read_engagement,pages_manage_posts&response_type=code&state=${state}`;
 
       return res.json({ url });
     }
@@ -177,47 +177,75 @@ export const handleOAuthCallback = async (req: Request, res: Response) => {
       );
     }
 
-    if (platform === "instagram") {
-      const { code, state } = req.query;
-      if (!code || !state)
-        return res.status(400).json({ message: "Missing code or state" });
+   if (platform === "instagram") {
+  const { code, state } = req.query;
+  if (!code || !state)
+    return res.status(400).json({ message: "Missing code or state" });
 
-      const decoded = jwt.verify(
-        state as string,
-        process.env.JWT_SECRET!
-      ) as TokenPayload;
-      const user = await User.findById(decoded.userId);
-      if (!user) return res.status(404).json({ message: "User not found" });
+  const decoded = jwt.verify(state as string, process.env.JWT_SECRET!) as TokenPayload;
+  const user = await User.findById(decoded.userId);
+  if (!user) return res.status(404).json({ message: "User not found" });
 
-      const resp = await axios.post(
-        "https://api.instagram.com/oauth/access_token",
-        new URLSearchParams({
-          client_id: process.env.INSTAGRAM_CLIENT_ID!,
-          client_secret: process.env.INSTAGRAM_CLIENT_SECRET!,
-          grant_type: "authorization_code",
-          redirect_uri: process.env.INSTAGRAM_CALLBACK_URL!,
-          code: code as string,
-        }),
-        { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
-      );
-
-      const { access_token } = resp.data;
-      if (!access_token)
-        return res
-          .status(500)
-          .json({ message: "Failed to get Instagram token" });
-
-      user.socialAccounts = {
-        ...user.socialAccounts,
-        instagram: { accessToken: access_token },
-      };
-      user.markModified("socialAccounts");
-      await user.save();
-
-      return res.redirect(
-        `${process.env.FRONTEND_URL}/dashboard?linked=instagram`
-      );
+  // 1️⃣ Exchange code for short-lived user token
+  const shortTokenResp = await axios.get(
+    "https://graph.facebook.com/v17.0/oauth/access_token",
+    {
+      params: {
+        client_id: process.env.INSTAGRAM_CLIENT_ID!,
+        client_secret: process.env.INSTAGRAM_CLIENT_SECRET!,
+        redirect_uri: process.env.INSTAGRAM_CALLBACK_URL!,
+        code,
+      },
     }
+  );
+
+  const shortLivedToken = shortTokenResp.data.access_token;
+
+  // 2️⃣ Exchange for long-lived token
+  const longTokenResp = await axios.get(
+    "https://graph.facebook.com/v17.0/oauth/access_token",
+    {
+      params: {
+        grant_type: "fb_exchange_token",
+        client_id: process.env.INSTAGRAM_CLIENT_ID!,
+        client_secret: process.env.INSTAGRAM_CLIENT_SECRET!,
+        fb_exchange_token: shortLivedToken,
+      },
+    }
+  );
+
+  const longLivedToken = longTokenResp.data.access_token;
+
+  // 3️⃣ Get user's pages
+  const pagesResp = await axios.get(
+    "https://graph.facebook.com/v17.0/me/accounts",
+    { params: { access_token: longLivedToken } }
+  );
+
+  const page = pagesResp.data.data[0]; // pick first page for example
+  if (!page) return res.status(500).json({ message: "No Facebook Page found" });
+
+  // 4️⃣ Get Instagram Business Account ID
+  const igResp = await axios.get(
+    `https://graph.facebook.com/v17.0/${page.id}`,
+    { params: { fields: "instagram_business_account", access_token: page.access_token } }
+  );
+
+  const igUserId = igResp.data.instagram_business_account?.id;
+  if (!igUserId) return res.status(500).json({ message: "No Instagram Business account found" });
+
+  // 5️⃣ Save tokens & igUserId in user document
+ user.socialAccounts.instagram = {
+  accessToken: page.access_token,        // renamed from pageAccessToken
+  instagramBusinessId: igUserId,         // renamed from instagramId
+};
+user.markModified("socialAccounts");
+await user.save();
+
+
+  return res.redirect(`${process.env.FRONTEND_URL}/dashboard?linked=instagram`);
+}
+
   } catch (error: any) {
     return res.status(500).json({ message: "OAuth callback failed" });
   }

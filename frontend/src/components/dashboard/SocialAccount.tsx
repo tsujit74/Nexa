@@ -83,8 +83,8 @@ export default function SocialAccounts() {
                   <Image
                     src={accounts.linkedin.photo}
                     alt={accounts.linkedin.name || "Profile Picture"}
-                    width={40} 
-                    height={40} 
+                    width={40}
+                    height={40}
                     className="rounded-full object-cover"
                   />
                 )}
@@ -109,6 +109,7 @@ export default function SocialAccounts() {
             </div>
 
             {/* Bottom: Linked badge or button */}
+            {/* Bottom: Linked badge or button */}
             <div className="flex justify-center mt-4">
               {accounts?.[platform.name as keyof SocialAccountsType] ? (
                 <span className="text-green-600 font-semibold bg-green-100 px-4 py-1 rounded text-sm">
@@ -116,20 +117,12 @@ export default function SocialAccounts() {
                 </span>
               ) : (
                 <button
-  disabled={loading || platform.name === "instagram"} // Disable Instagram
-  onClick={() => linkAccount(platform.name)}
-  className={`bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 shadow-sm text-sm font-medium disabled:opacity-50 ${
-    platform.name === "instagram" ? "cursor-not-allowed opacity-50" : ""
-  }`}
-  title={
-    platform.name === "instagram"
-      ? "Instagram linking is currently disabled"
-      : ""
-  }
->
-  {platform.name === "instagram" ? "Unavailable" : loading ? "Linking..." : "Link Account"}
-</button>
-
+                  disabled={loading} // only disable while loading
+                  onClick={() => linkAccount(platform.name)}
+                  className={`bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 shadow-sm text-sm font-medium disabled:opacity-50`}
+                >
+                  {loading ? "Linking..." : "Link Account"}
+                </button>
               )}
             </div>
           </div>
