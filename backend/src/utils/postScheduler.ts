@@ -3,6 +3,7 @@ import Post from "../models/Post";
 import User from "../models/User";
 import { postToTwitter } from "./platformTwittter";
 import { postToLinkedIn } from "./platformLinkedIn";
+import { postToInstagram } from "./platformInstagram";
 // import { postToInstagram } from "./platformInstagram";
 
 export const runSchedulerNow = async () => {
@@ -11,7 +12,9 @@ export const runSchedulerNow = async () => {
   try {
     // Get current IST time
     const localTime = new Date();
-    const now = new Date(localTime.getTime() - localTime.getTimezoneOffset() * 60000);
+    const now = new Date(
+      localTime.getTime() - localTime.getTimezoneOffset() * 60000
+    );
 
     // Count pending posts
     const pendingCount = await Post.countDocuments({ status: "pending" });
@@ -46,19 +49,33 @@ export const runSchedulerNow = async () => {
 
       try {
         // Twitter
-        if (["twitter", "all"].includes(post.platform) && user.socialAccounts.twitter) {
+        if (
+          ["twitter", "all"].includes(post.platform) &&
+          user.socialAccounts.twitter
+        ) {
           await postToTwitter(post, user.socialAccounts.twitter);
         }
 
         // LinkedIn
-        if (["linkedin", "all"].includes(post.platform) && user.socialAccounts.linkedin) {
+        if (
+          ["linkedin", "all"].includes(post.platform) &&
+          user.socialAccounts.linkedin
+        ) {
           await postToLinkedIn(post, user.socialAccounts.linkedin);
         }
 
-        // Instagram (optional)
-        // if (["instagram", "all"].includes(post.platform) && user.socialAccounts.instagram) {
-        //   await postToInstagram(post, user.socialAccounts.instagram, user.socialAccounts.instagramId);
-        // }
+        //Instagram (optional)
+        if (
+          ["instagram", "all"].includes(post.platform) &&
+          user.socialAccounts.instagram?.accessToken &&
+          user.socialAccounts.instagram?.instagramBusinessId
+        ) {
+          await postToInstagram(post, {
+            accessToken: user.socialAccounts.instagram.accessToken,
+            instagramBusinessId:
+              user.socialAccounts.instagram.instagramBusinessId,
+          });
+        }
 
         post.status = "posted";
         await post.save();

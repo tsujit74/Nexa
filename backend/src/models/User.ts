@@ -1,6 +1,7 @@
 // models/User.ts
 import { Schema, model, Document } from "mongoose";
 import bcrypt from "bcrypt";
+import { IPost } from "./Post";
 
 export type Platform = "twitter" | "linkedin" | "instagram";
 
@@ -24,6 +25,7 @@ export interface IInstagramAccount {
 }
 
 export interface ISocialAccounts {
+  instagramBusinessId(post: Document<unknown, {}, IPost, {}, {}> & IPost & Required<{ _id: unknown; }> & { __v: number; }, instagram: IInstagramAccount, instagramBusinessId: any): unknown;
   twitterTemp: any;
   twitter?: ITwitterAccount;
   linkedin?: ILinkedinAccount;
