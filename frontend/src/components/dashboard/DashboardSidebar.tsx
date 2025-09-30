@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo, JSX } from "react";
 import { Calendar, List, LogOut, User as UserIcon, LogIn } from "lucide-react";
+import Link from "next/link";
 
 interface Section {
   id: string;
@@ -92,18 +93,18 @@ export default function DashboardSidebar() {
             {isLoggingOut ? "Logging out..." : "Logout"}
           </button>
         ) : (
-          <button
-            onClick={() => router.push("/dashboard")}
-            className="flex items-center gap-2 w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2  text-sm font-medium transition"
-          >
-            <LogIn size={16} />
-            Login
-          </button>
+          <div>
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="flex items-center gap-2 w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2  text-sm font-medium transition"
+            >
+              <LogIn size={16} />
+              Login
+            </button>
+          </div>
         )}
-
+        <Link href={"/privacy"} className="flex items-center gap-2 w-full bg-gray-500 hover:bg-gray-600 text-white px-4 py-2  text-sm font-medium transition mt-2">Privacy Policy</Link>
       </div>
-
-      
 
       {user ? (
         <nav className="flex-1 p-4 flex flex-col gap-2 overflow-y-auto">
@@ -111,7 +112,9 @@ export default function DashboardSidebar() {
             <button
               key={id}
               onClick={() =>
-                document.getElementById(id)?.scrollIntoView({ behavior: "smooth" })
+                document
+                  .getElementById(id)
+                  ?.scrollIntoView({ behavior: "smooth" })
               }
               className={`flex items-center gap-3 px-4 py-2  font-medium transition ${
                 activeSection === id
@@ -129,8 +132,6 @@ export default function DashboardSidebar() {
           Please login to access dashboard features
         </div>
       )}
-
-      
 
       <div className="p-4 border-t text-xs text-gray-400 text-center">
         © {new Date().getFullYear()} Sujit Thakur

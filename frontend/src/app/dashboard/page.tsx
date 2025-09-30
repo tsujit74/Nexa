@@ -8,9 +8,10 @@ import PostSchedulerCalendar from "@/components/dashboard/PostSchedulerDashboard
 import DashboardSidebar from "@/components/dashboard/DashboardSidebar";
 import { PostsProvider } from "@/context/PostContext";
 import FloatingChatbot from "@/components/dashboard/FlaotingChatbot";
-import { useAuthContext } from "@/context/AuthContext";  
-import AuthPage from "@/components/auth/page";       
+import { useAuthContext } from "@/context/AuthContext";
+import AuthPage from "@/components/auth/page";
 import Disclaimer from "@/components/Disclaimer/Disclaimer";
+import Privacy from "../privacy/page";
 export default function DashboardPage() {
   const [generatedContent, setGeneratedContent] = useState("");
   const { token, loading } = useAuthContext();
@@ -18,8 +19,11 @@ export default function DashboardPage() {
   // While checking session
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Checking session...</p>
+      <div>
+        <DashboardSidebar />
+        <div className="min-h-screen flex items-center justify-center">
+          <p>Checking session...</p>
+        </div>
       </div>
     );
   }
@@ -43,7 +47,7 @@ export default function DashboardPage() {
         <DashboardSidebar />
 
         <main className="flex-1 p-8 ml-80 space-y-8">
-          <Disclaimer/>
+          <Disclaimer />
           {/* Social Accounts */}
           <section id="social">
             <h2 className="text-3xl font-bold mb-4 text-gray-800 border-b pb-2">
@@ -77,6 +81,19 @@ export default function DashboardPage() {
               </div>
             </div>
           </section>
+
+          {/* Privacy Policy */}
+<section id="privacy">
+  <h2 className="text-3xl font-bold mb-4 text-gray-800 border-b pb-2">
+    Privacy Policy
+  </h2>
+  <div className="bg-white p-6 text-gray-700 leading-relaxed">
+    <p>
+      This is where your privacy policy content goes. You can make it static
+      text, or import a `< Privacy/>` component if you want.
+    </p>
+  </div>
+</section>
 
 
           <FloatingChatbot onGenerate={(text) => setGeneratedContent(text)} />
