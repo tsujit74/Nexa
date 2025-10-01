@@ -82,19 +82,6 @@ export default function DashboardPage() {
             </div>
           </section>
 
-          {/* Privacy Policy */}
-<section id="privacy">
-  <h2 className="text-3xl font-bold mb-4 text-gray-800 border-b pb-2">
-    Privacy Policy
-  </h2>
-  <div className="bg-white p-6 text-gray-700 leading-relaxed">
-    <p>
-      This is where your privacy policy content goes. You can make it static
-      text, or import a `< Privacy/>` component if you want.
-    </p>
-  </div>
-</section>
-
 
           <FloatingChatbot onGenerate={(text) => setGeneratedContent(text)} />
         </main>
